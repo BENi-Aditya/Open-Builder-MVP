@@ -31,7 +31,12 @@ To get the authentication working, you need to set up **Supabase** and **Google 
 
 ## 4. Final Verification
 1. Restart your development server: `npm run dev`.
-2. Go to [http://localhost:8081/auth](http://localhost:8081/auth).
+2. Go to [http://localhost:8082/auth](http://localhost:8082/auth). (Note: The port may change to 8082 if 8080/8081 are busy).
 3. Try signing in with Google or creating an email account.
 
-**Note:** Ensure your email provider is also configured in Supabase (Authentication > Providers > Email) if you want to use email/password signups with verification.
+### Safari Troubleshooting
+If you are using **Safari** and see `net::ERR_ABORTED` or a 404 page:
+1. **Disable "Prevent Cross-Site Tracking"**: Go to Safari > Settings > Privacy and uncheck "Prevent cross-site tracking" temporarily to test.
+2. **Try Chrome or Firefox**: Safari's strict privacy rules often block Supabase requests on `localhost`.
+3. **Check Console**: If you see a "404" screen with a "Back to feed" button, it means the app is running but the route is not being matched. Try a hard refresh (`Cmd+Shift+R`).
+

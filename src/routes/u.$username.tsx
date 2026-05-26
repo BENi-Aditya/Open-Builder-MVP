@@ -48,13 +48,29 @@ function ProfilePage() {
   return (
     <div className="pb-24">
       {/* Banner */}
-      <div className="h-48 md:h-64 relative grid-bg" style={{ background: profile.banner_url ? undefined : "linear-gradient(135deg, var(--grape), var(--tangerine))" }}>
-        {profile.banner_url && <img src={profile.banner_url} alt="" className="w-full h-full object-cover" />}
+      <div 
+        className="h-32 md:h-44 relative overflow-hidden bg-ink border-b-2 border-white/10"
+      >
+        <div className="absolute inset-0 grid-bg opacity-30" />
+        {profile.banner_url ? (
+          <>
+            <img 
+              src={profile.banner_url} 
+              alt="" 
+              className="w-full h-full object-cover opacity-60 grayscale-[30%]" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-transparent opacity-60" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
+        )}
+        <div className="absolute inset-0 scan-noise opacity-20" />
       </div>
+
       <div className="max-w-5xl mx-auto px-4 md:px-8">
-        <div className="flex items-end gap-4 -mt-14 flex-wrap">
-          <div className="border-2 border-white" style={{ boxShadow: "6px 6px 0 0 var(--primary)" }}>
-            <Avatar profile={profile} size={112} />
+        <div className="flex items-end gap-4 -mt-10 flex-wrap relative z-10">
+          <div className="bg-ink border-2 border-white shadow-[4px_4px_0_0_rgba(255,255,255,0.9)] overflow-hidden">
+            <Avatar profile={profile} size={100} />
           </div>
           <div className="flex-1 min-w-0 pb-2">
             <h1 className="font-display font-black text-3xl md:text-4xl leading-none">{profile.display_name || profile.username}</h1>

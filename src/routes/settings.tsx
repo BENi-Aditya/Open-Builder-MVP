@@ -62,7 +62,10 @@ function SettingsPage() {
         <F label="Skills (comma separated)"><input value={Array.isArray(form.skills) ? form.skills.join(", ") : form.skills || ""} onChange={(e) => setForm({ ...form, skills: e.target.value })} className="brutal-input" /></F>
         <F label="Tech stack (comma separated)"><input value={Array.isArray(form.tech_stack) ? form.tech_stack.join(", ") : form.tech_stack || ""} onChange={(e) => setForm({ ...form, tech_stack: e.target.value })} className="brutal-input" /></F>
         <F label="Avatar"><input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)} className="brutal-input" /></F>
-        <F label="Banner"><input type="file" accept="image/*" onChange={(e) => setBannerFile(e.target.files?.[0] ?? null)} className="brutal-input" /></F>
+        <F label="Banner (Recommended: 1200x400)">
+          <input type="file" accept="image/*" onChange={(e) => setBannerFile(e.target.files?.[0] ?? null)} className="brutal-input" />
+          <p className="text-[10px] font-mono text-muted-foreground mt-1">// Banners are automatically muted to fit the theme</p>
+        </F>
         <button disabled={saving} className="brutal-btn w-full justify-center">{saving ? "Saving…" : "Save"}</button>
       </form>
     </div>

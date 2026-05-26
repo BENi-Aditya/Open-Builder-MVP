@@ -81,13 +81,25 @@ function ProjectPage() {
   return (
     <div className="pb-24">
       {/* Hero */}
-      <div className="relative h-64 md:h-96 grid-bg overflow-hidden" style={{ background: "linear-gradient(135deg, var(--grape), var(--primary))" }}>
-        {project.cover_url && <img src={project.cover_url} alt="" className="w-full h-full object-cover opacity-90" />}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+      <div className="relative h-48 md:h-72 bg-ink border-b-2 border-white/10 overflow-hidden">
+        <div className="absolute inset-0 grid-bg opacity-30" />
+        {project.cover_url ? (
+          <>
+            <img 
+              src={project.cover_url} 
+              alt="" 
+              className="w-full h-full object-cover opacity-60 grayscale-[20%]" 
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-80" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
+        )}
+        <div className="absolute inset-0 scan-noise opacity-15" />
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-20 relative">
-        <div className="brutal-card p-6 md:p-8">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 -mt-16 relative z-10">
+        <div className="brutal-card bg-card p-6 md:p-8">
           <div className="flex flex-wrap gap-2 mb-3">
             {project.category && <span className="pill bg-primary text-primary-foreground border-primary">{project.category}</span>}
             {project.tech_stack?.map((t: string) => <span key={t} className="pill text-muted-foreground">{t}</span>)}

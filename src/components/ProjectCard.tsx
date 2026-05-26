@@ -63,18 +63,24 @@ export function ProjectCard({ project, accentSeed = 0, size = "md" }: { project:
   const heights = { sm: "h-32", md: "h-44", lg: "h-64" };
 
   return (
-    <article className="brutal-card overflow-hidden flex flex-col">
+    <article className="brutal-card overflow-hidden flex flex-col group">
       <Link to="/p/$id" params={{ id: project.id }} className="block relative overflow-hidden">
-        <div className={`${heights[size]} relative`} style={{ background: accent }}>
+        <div className={`${heights[size]} relative bg-ink overflow-hidden border-b border-white/10`}>
+          <div className="absolute inset-0 grid-bg opacity-20" />
           {project.cover_url ? (
-            <img src={project.cover_url} alt={project.title} className="w-full h-full object-cover" />
+            <img 
+              src={project.cover_url} 
+              alt={project.title} 
+              className="w-full h-full object-cover opacity-70 grayscale-[20%] group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300" 
+            />
           ) : (
-            <div className="absolute inset-0 grid-bg grid place-items-center">
-              <span className="font-display font-black text-5xl text-black/80">{project.title[0]?.toUpperCase()}</span>
+            <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-primary/5 to-transparent">
+              <span className="font-display font-black text-5xl text-white/10 select-none">{project.title[0]?.toUpperCase()}</span>
             </div>
           )}
+          <div className="absolute inset-0 scan-noise opacity-10" />
           {project.category && (
-            <span className="absolute top-2 left-2 pill bg-black text-white border-white">{project.category}</span>
+            <span className="absolute top-2 left-2 pill bg-black text-white border-white z-10">{project.category}</span>
           )}
         </div>
       </Link>
