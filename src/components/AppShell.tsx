@@ -45,9 +45,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col gap-4 border-r-2 border-white/10 p-5 sticky top-0 h-screen overflow-y-auto">
         <Link to="/" className="flex items-center gap-2 mb-2">
-          <div className="w-9 h-9 bg-primary text-primary-foreground border-2 border-white grid place-items-center font-black text-lg" style={{ boxShadow: "3px 3px 0 0 #fff" }}>
-            {"<>"}
-          </div>
+          <img
+            src="/logo.webp"
+            alt="studojo"
+            className="w-9 h-9 border-2 border-white object-cover"
+            style={{ boxShadow: "3px 3px 0 0 #fff" }}
+          />
           <div>
             <div className="font-display font-black text-lg leading-none">OPENBUILDER</div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">beta // build publicly</div>
