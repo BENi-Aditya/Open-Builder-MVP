@@ -24,9 +24,15 @@ async function getServerEntry(): Promise<ServerEntry> {
 
 function brandedErrorResponse(error?: unknown): Response {
   const message = error instanceof Error ? error.message : String(error || "Unknown error");
-  console.error("Critical SSR Error:", message, error);
+  console.error("Critical SSR Error:", message);
+  if (error instanceof Error && error.stack) {
+    console.error("Stack trace:", error.stack);
+  }
   
-  return new Response(renderErrorPage(message), {
+  // Ensure the message is never empty so it shows in the UI
+  const finalMessage = message.trim() || "An unexpected error occurred during server-side rendering.";
+  
+  return new Response(renderErrorPage(finalMessage), {
     status: 500,
     headers: { "content-type": "text/html; charset=utf-8" },
   });
@@ -80,6 +86,17 @@ export default {
     // Early exit for common missing static files to avoid SSR overhead/errors
     if (url.pathname === "/favicon.ico" || url.pathname === "/robots.txt") {
       return new Response(null, { status: 404 });
+    }
+
+    // In some environments (like Vercel Edge or Cloudflare), environment variables
+    // are passed in the 'env' object rather than process.env.
+    // We sync them here so the rest of the app can access them via process.env.
+    if (env && typeof env === "object") {
+      Object.entries(env).forEach(([key, value]) => {
+        if (typeof value === "string" && !process.env[key]) {
+          process.env[key] = value;
+        }
+      });
     }
 
     try {

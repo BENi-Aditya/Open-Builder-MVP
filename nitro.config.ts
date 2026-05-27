@@ -1,11 +1,6 @@
 export default {
   preset: "vercel",
-  output: {
-    dir: ".vercel/output",
-    publicDir: ".vercel/output/static",
-  },
-  // Ensure that we don't try to use Node.js specific features if we want to be compatible
-  // with different Vercel runtimes, but here we are using Node.js.
+  // Nitro will automatically handle the Build Output API structure for Vercel
+  // including the .vercel/output directory.
   node: true,
-  // Add some helpful headers or configuration if needed
 };
