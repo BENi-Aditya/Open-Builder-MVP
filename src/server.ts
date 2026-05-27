@@ -80,20 +80,29 @@ function isCatastrophicSsrErrorBody(body: string, responseStatus: number): boole
 }
 
 export default {
-  async fetch(request: Request, env: unknown, ctx: unknown) {
+  async fetch(request: Request, env: any, ctx: unknown) {
     const url = new URL(request.url);
     
     // Early exit for common missing static files to avoid SSR overhead/errors
-    if (url.pathname === "/favicon.ico" || url.pathname === "/robots.txt") {
+    if (
+      url.pathname === "/favicon.ico" || 
+      url.pathname === "/robots.txt" || 
+      url.pathname.startsWith("/assets/")
+    ) {
       return new Response(null, { status: 404 });
     }
 
-    // In some environments (like Vercel Edge or Cloudflare), environment variables
-    // are passed in the 'env' object rather than process.env.
-    // We sync them here so the rest of the app can access them via process.env.
+    // CRITICAL: Inject env variables into process.env for the Supabase client
     if (env && typeof env === "object") {
+      // Direct assignment for the most common keys to be 100% sure
+      if (env.VITE_SUPABASE_URL) process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
+      if (env.VITE_SUPABASE_PUBLISHABLE_KEY) process.env.VITE_SUPABASE_PUBLISHABLE_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      if (env.SUPABASE_URL) process.env.SUPABASE_URL = env.SUPABASE_URL;
+      if (env.SUPABASE_PUBLISHABLE_KEY) process.env.SUPABASE_PUBLISHABLE_KEY = env.SUPABASE_PUBLISHABLE_KEY;
+      
+      // Batch sync all other keys
       Object.entries(env).forEach(([key, value]) => {
-        if (typeof value === "string" && !process.env[key]) {
+        if (typeof value === "string") {
           process.env[key] = value;
         }
       });
