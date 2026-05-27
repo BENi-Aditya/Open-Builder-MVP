@@ -25,5 +25,14 @@ function createSupabaseClient() {
   });
 }
 
-export const supabase = createSupabaseClient();
+let _supabase: ReturnType<typeof createClient<Database>> | undefined;
+
+export const supabase = new Proxy({} as ReturnType<typeof createClient<Database>>, {
+  get(_, prop, receiver) {
+    if (!_supabase) {
+      _supabase = createSupabaseClient();
+    }
+    return Reflect.get(_supabase, prop, receiver);
+  },
+});
 

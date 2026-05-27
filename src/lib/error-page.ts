@@ -1,4 +1,10 @@
-export function renderErrorPage(): string {
+export function renderErrorPage(errorMessage?: string): string {
+  const displayError = errorMessage 
+    ? `<div style="margin-top: 1rem; padding: 0.5rem; background: #fee2e2; color: #991b1b; border-radius: 0.25rem; font-family: monospace; font-size: 0.75rem; text-align: left; overflow-x: auto;">
+        <strong>Error:</strong> ${errorMessage}
+      </div>`
+    : "";
+
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -20,7 +26,8 @@ export function renderErrorPage(): string {
     <div class="card">
       <h1>This page didn't load</h1>
       <p>Something went wrong on our end. You can try refreshing or head back home.</p>
-      <div class="actions">
+      ${displayError}
+      <div class="actions" style="margin-top: 1.5rem;">
         <button class="primary" onclick="location.reload()">Try again</button>
         <a class="secondary" href="/">Go home</a>
       </div>
