@@ -11,28 +11,26 @@ When you import your project into Vercel, you **MUST** add the following environ
 | `VITE_SUPABASE_PUBLISHABLE_KEY` | Your Supabase Anon Key |
 | `SUPABASE_URL` | Same as `VITE_SUPABASE_URL` |
 | `SUPABASE_PUBLISHABLE_KEY` | Same as `VITE_SUPABASE_PUBLISHABLE_KEY` |
-| `TANSTACK_START_DEPLOYMENT` | `vercel` |
 
 ## 2. Vercel Project Settings
-Vercel should automatically detect **TanStack Start**. Ensure the following settings are used in the Vercel Dashboard:
+I have added a `vercel.json` file that explicitly configures the build for TanStack Start. Ensure the following settings are used in the Vercel Dashboard:
 
-- **Framework Preset**: `TanStack Start` (Vercel will auto-detect this).
+- **Framework Preset**: `Other` (Do NOT use TanStack Start preset as it might conflict with our custom `vercel.json`).
 - **Build Command**: `npm run build`
-- **Output Directory**: Leave as default (Vercel will handle this for TanStack Start).
+- **Output Directory**: `.output`
 - **Install Command**: `npm install --legacy-peer-deps`
 
 ## 3. Update Google OAuth Redirect URI
-Since you are deploying to a new domain (e.g., `open-builder-mvp.vercel.app`), you need to update your Google OAuth settings:
-
 1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
 2. Select your project and go to **APIs & Services > Credentials**.
 3. Edit your **OAuth 2.0 Client ID**.
 4. Add your Vercel URL to **Authorized JavaScript origins**:
-   - `https://your-project.vercel.app`
+   - `https://open-builder-mvp.vercel.app`
 5. Add the Supabase callback URL to **Authorized redirect URIs**:
-   - `https://your-supabase-project-id.supabase.co/auth/v1/callback`
+   - `https://xypwkophnbcimzbsvein.supabase.co/auth/v1/callback`
 
 ## 4. Why the 404 error?
-The 404 error happened because we were manually overriding the output directory in a `vercel.json` file. I have deleted that file so Vercel can use its built-in **TanStack Start** support, which correctly handles the server-side functions and routing.
-
-By adding `TANSTACK_START_DEPLOYMENT=vercel` to your environment variables, the build process will now generate the correct structure for Vercel.
+The 404 error occurred because Vercel didn't know how to route requests to the TanStack Start server functions. 
+- I have updated `vite.config.ts` to explicitly set `deployment: 'vercel'`.
+- I have added a `vercel.json` that maps all incoming requests to the `.output` directory where the server bundle lives.
+- I have set the output directory to `.output` which is where TanStack Start generates the Vercel-compatible build.
