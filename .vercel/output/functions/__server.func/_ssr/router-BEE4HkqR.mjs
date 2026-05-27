@@ -1,0 +1,462 @@
+import { Q as QueryClient } from "../_libs/tanstack__query-core.mjs";
+import { Q as QueryClientProvider } from "../_libs/tanstack__react-query.mjs";
+import { b as createRouter, a as createRootRouteWithContext, e as useRouter, L as Link, O as Outlet, H as HeadContent, S as Scripts, c as createFileRoute, l as lazyRouteComponent, u as useLocation, d as useNavigate } from "../_libs/tanstack__react-router.mjs";
+import { j as jsxRuntimeExports, r as reactExports } from "../_libs/react.mjs";
+import { T as Toaster } from "../_libs/sonner.mjs";
+import { s as supabase } from "./client-BkH9hjXP.mjs";
+import { S as Search, c as House, C as Compass, i as Users, B as Bell, a as Bookmark, e as Plus, g as Settings, L as LogOut, H as Hammer } from "../_libs/lucide-react.mjs";
+import "../_libs/tanstack__router-core.mjs";
+import "../_libs/tanstack__history.mjs";
+import "../_libs/cookie-es.mjs";
+import "../_libs/seroval.mjs";
+import "../_libs/seroval-plugins.mjs";
+import "node:stream/web";
+import "node:stream";
+import "../_libs/react-dom.mjs";
+import "util";
+import "crypto";
+import "async_hooks";
+import "stream";
+import "../_libs/isbot.mjs";
+import "../_libs/supabase__supabase-js.mjs";
+import "../_libs/supabase__postgrest-js.mjs";
+import "../_libs/supabase__realtime-js.mjs";
+import "../_libs/supabase__phoenix.mjs";
+import "../_libs/supabase__storage-js.mjs";
+import "../_libs/iceberg-js.mjs";
+import "../_libs/supabase__auth-js.mjs";
+import "tslib";
+import "../_libs/supabase__functions-js.mjs";
+const appCss = "/assets/styles-6qSbVIeQ.css";
+const Ctx = reactExports.createContext({
+  user: null,
+  session: null,
+  profile: null,
+  loading: true,
+  signOut: async () => {
+  },
+  refreshProfile: async () => {
+  }
+});
+function AuthProvider({ children }) {
+  const [session, setSession] = reactExports.useState(null);
+  const [profile, setProfile] = reactExports.useState(null);
+  const [loading, setLoading] = reactExports.useState(true);
+  const loadProfile = async (uid) => {
+    const { data } = await supabase.from("profiles").select("id, username, display_name, avatar_url, banner_url, bio").eq("id", uid).maybeSingle();
+    setProfile(data ?? null);
+  };
+  reactExports.useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      setSession(s);
+      if (s?.user) {
+        setTimeout(() => loadProfile(s.user.id), 0);
+      } else {
+        setProfile(null);
+      }
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      if (data.session?.user) loadProfile(data.session.user.id);
+      setLoading(false);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(
+    Ctx.Provider,
+    {
+      value: {
+        user: session?.user ?? null,
+        session,
+        profile,
+        loading,
+        signOut: async () => {
+          await supabase.auth.signOut();
+        },
+        refreshProfile: async () => {
+          if (session?.user) await loadProfile(session.user.id);
+        }
+      },
+      children
+    }
+  );
+}
+const useAuth = () => reactExports.useContext(Ctx);
+const NAV = [
+  { to: "/", label: "Feed", icon: House },
+  { to: "/explore", label: "Explore", icon: Compass },
+  { to: "/collab", label: "Collab", icon: Users },
+  { to: "/notifications", label: "Inbox", icon: Bell },
+  { to: "/saved", label: "Saved", icon: Bookmark }
+];
+function AppShell({ children }) {
+  const { user, profile, signOut } = useAuth();
+  const loc = useLocation();
+  const nav = useNavigate();
+  const [unread, setUnread] = reactExports.useState(0);
+  const [q, setQ] = reactExports.useState("");
+  reactExports.useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const { count } = await supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
+      setUnread(count ?? 0);
+    };
+    load();
+    const ch = supabase.channel("notif-shell").on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
+    return () => {
+      ch.unsubscribe();
+    };
+  }, [user]);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen grid grid-bg", style: { gridTemplateColumns: "minmax(0, 260px) 1fr" }, children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "hidden md:flex flex-col gap-4 border-r-2 border-white/10 p-5 sticky top-0 h-screen overflow-y-auto", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/", className: "flex items-center gap-2 mb-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(
+          "img",
+          {
+            src: "/logo.webp",
+            alt: "studojo",
+            className: "w-9 h-9 border-2 border-white object-cover",
+            style: { boxShadow: "3px 3px 0 0 #fff" }
+          }
+        ),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-display font-black text-lg leading-none", children: "OPENBUILDER" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "text-[10px] font-mono uppercase tracking-widest text-muted-foreground", children: "beta // build publicly" })
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        "form",
+        {
+          onSubmit: (e) => {
+            e.preventDefault();
+            if (q.trim()) nav({ to: "/explore", search: { q: q.trim() } });
+          },
+          className: "relative",
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Search, { className: "absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" }),
+            /* @__PURE__ */ jsxRuntimeExports.jsx("input", { value: q, onChange: (e) => setQ(e.target.value), placeholder: "search builders, projects", className: "brutal-input pl-8 text-xs" })
+          ]
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "flex flex-col gap-1", children: NAV.map((n) => {
+        const active = loc.pathname === n.to || n.to !== "/" && loc.pathname.startsWith(n.to);
+        return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+          Link,
+          {
+            to: n.to,
+            className: `flex items-center justify-between px-3 py-2 border-2 ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent hover:border-white/30"}`,
+            style: active ? { boxShadow: "3px 3px 0 0 #fff" } : {},
+            children: [
+              /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { className: "flex items-center gap-3 font-bold uppercase text-xs tracking-wider", children: [
+                /* @__PURE__ */ jsxRuntimeExports.jsx(n.icon, { className: "w-4 h-4" }),
+                " ",
+                n.label
+              ] }),
+              n.to === "/notifications" && unread > 0 && /* @__PURE__ */ jsxRuntimeExports.jsx("span", { className: "pill bg-destructive text-white border-white", children: unread })
+            ]
+          },
+          n.to
+        );
+      }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/new", className: "brutal-btn justify-center mt-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Plus, { className: "w-4 h-4" }),
+        " Ship a project"
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "mt-auto pt-4 border-t-2 border-white/10", children: user && profile ? /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "space-y-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/u/$username", params: { username: profile.username }, className: "flex items-center gap-3 p-2 hover:bg-white/5", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { profile, size: 36 }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-w-0", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-bold text-sm truncate", children: profile.display_name || profile.username }),
+            /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "text-xs text-muted-foreground font-mono truncate", children: [
+              "@",
+              profile.username
+            ] })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex gap-1", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/settings", className: "brutal-btn brutal-btn-ghost flex-1 text-[10px] py-1.5", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Settings, { className: "w-3 h-3" }),
+            " Settings"
+          ] }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => signOut(), className: "brutal-btn brutal-btn-ghost text-[10px] py-1.5 px-2", children: /* @__PURE__ */ jsxRuntimeExports.jsx(LogOut, { className: "w-3 h-3" }) })
+        ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/auth", className: "brutal-btn w-full justify-center", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx(Hammer, { className: "w-4 h-4" }),
+        " Join the builders"
+      ] }) })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "min-w-0", children }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "md:hidden fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 bg-card border-t-2 border-white", children: NAV.map((n) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: n.to, className: "flex flex-col items-center py-2 text-[10px] font-bold uppercase", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(n.icon, { className: "w-5 h-5 mb-0.5" }),
+      n.label
+    ] }, n.to)) })
+  ] });
+}
+function Avatar({ profile, size = 32 }) {
+  if (!profile) return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: size, height: size }, className: "bg-muted border-2 border-white" });
+  if (profile.avatar_url) {
+    return /* @__PURE__ */ jsxRuntimeExports.jsx(
+      "img",
+      {
+        src: profile.avatar_url,
+        alt: profile.username,
+        style: { width: size, height: size },
+        className: "border-2 border-white object-cover"
+      }
+    );
+  }
+  const letter = (profile.display_name || profile.username || "?")[0].toUpperCase();
+  const palette = ["bg-primary text-primary-foreground", "bg-[var(--grape)] text-white", "bg-[var(--tangerine)] text-black", "bg-[var(--sky)] text-black", "bg-[var(--citrus)] text-white"];
+  const idx = (profile.username.charCodeAt(0) || 0) % palette.length;
+  return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { style: { width: size, height: size, fontSize: size * 0.45 }, className: `${palette[idx]} border-2 border-white grid place-items-center font-black`, children: letter });
+}
+function PixelCursor() {
+  const cursorRef = reactExports.useRef(null);
+  const burstRef = reactExports.useRef(null);
+  reactExports.useEffect(() => {
+    const cursor = cursorRef.current;
+    const burst = burstRef.current;
+    if (!cursor || !burst) return;
+    let raf = 0;
+    let x = -100, y = -100;
+    let tx = -100, ty = -100;
+    const move = (e) => {
+      tx = e.clientX;
+      ty = e.clientY;
+      const t = e.target;
+      const isInteractive = !!t.closest("a, button, [role='button'], input, textarea, select, .brutal-card");
+      cursor.dataset.hover = isInteractive ? "1" : "0";
+    };
+    const click = (e) => {
+      burst.style.left = `${e.clientX}px`;
+      burst.style.top = `${e.clientY}px`;
+      burst.classList.remove("animate");
+      void burst.offsetWidth;
+      burst.classList.add("animate");
+    };
+    const tick = () => {
+      x += (tx - x) * 0.35;
+      y += (ty - y) * 0.35;
+      cursor.style.transform = `translate(${x}px, ${y}px)`;
+      raf = requestAnimationFrame(tick);
+    };
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mousedown", click);
+    raf = requestAnimationFrame(tick);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      window.removeEventListener("mousedown", click);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
+        .pix-cursor { position: fixed; left: 0; top: 0; width: 20px; height: 20px; pointer-events: none; z-index: 9999; will-change: transform; image-rendering: pixelated; mix-blend-mode: normal; }
+        .pix-cursor svg { transition: transform 80ms ease; }
+        .pix-cursor[data-hover="1"] svg { transform: scale(1.4) rotate(-6deg); }
+        .pix-burst { position: fixed; left: 0; top: 0; width: 24px; height: 24px; pointer-events: none; z-index: 9998; transform: translate(-12px, -12px); }
+        .pix-burst.animate { animation: pix-burst .35s steps(4) forwards; }
+        @keyframes pix-burst {
+          0% { transform: translate(-12px, -12px) scale(0.4); opacity: 1; }
+          100% { transform: translate(-12px, -12px) scale(2.2); opacity: 0; }
+        }
+        @media (max-width: 768px) { .pix-cursor, .pix-burst { display: none; } body, a, button { cursor: auto !important; } }
+      ` }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: cursorRef, className: "pix-cursor", "aria-hidden": true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "20", height: "20", viewBox: "0 0 16 16", shapeRendering: "crispEdges", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M2 1h2v1h1v1h1v1h1v1h1v1h1v1h1v1H8v1h1v3H8v-1H7v-1H6v-1H5v1H4v1H3v1H2V1z", fill: "#0a0a0a" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("path", { d: "M3 2h1v1h1v1h1v1h1v1h1v1h1v1H7v1h1v2H7v-1H6v-1H5v-1H4v1H3V2z", fill: "#FFD600" })
+    ] }) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { ref: burstRef, className: "pix-burst", "aria-hidden": true, children: /* @__PURE__ */ jsxRuntimeExports.jsxs("svg", { width: "24", height: "24", viewBox: "0 0 8 8", shapeRendering: "crispEdges", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "0", width: "2", height: "1", fill: "#FFD600" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "3", y: "7", width: "2", height: "1", fill: "#FFD600" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "0", y: "3", width: "1", height: "2", fill: "#FFD600" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "7", y: "3", width: "1", height: "2", fill: "#FFD600" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "1", y: "1", width: "1", height: "1", fill: "#e85d3a" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "6", y: "1", width: "1", height: "1", fill: "#e85d3a" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "1", y: "6", width: "1", height: "1", fill: "#e85d3a" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("rect", { x: "6", y: "6", width: "1", height: "1", fill: "#e85d3a" })
+    ] }) })
+  ] });
+}
+const Route$a = createRootRouteWithContext()({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "OpenBuilder — Build publicly. Collaborate openly." },
+      { name: "description", content: "OpenBuilder is the social ecosystem for student builders. Ship projects, post build logs, find collaborators." },
+      { property: "og:title", content: "OpenBuilder" },
+      { property: "og:description", content: "Build publicly. Collaborate openly." },
+      { property: "og:type", content: "website" }
+    ],
+    links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" }
+    ]
+  }),
+  shellComponent: RootShell,
+  component: RootComponent,
+  notFoundComponent: () => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen grid place-items-center p-8 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-display text-7xl font-black", children: "404" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-muted-foreground font-mono uppercase text-xs", children: "page not found" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/", className: "brutal-btn mt-4 inline-flex", children: "Back to feed" })
+  ] }) }),
+  errorComponent: ({ error, reset }) => {
+    const router2 = useRouter();
+    return /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "min-h-screen grid place-items-center p-8 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "font-display text-3xl font-black", children: "Something broke" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-muted-foreground font-mono text-xs", children: error.message }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => {
+        router2.invalidate();
+        reset();
+      }, className: "brutal-btn mt-4", children: "Retry" })
+    ] }) });
+  }
+});
+function RootShell({ children }) {
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("html", { lang: "en", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx("head", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(HeadContent, {}) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("body", { children: [
+      children,
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Scripts, {})
+    ] })
+  ] });
+}
+function RootComponent() {
+  const { queryClient } = Route$a.useRouteContext();
+  return /* @__PURE__ */ jsxRuntimeExports.jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxRuntimeExports.jsxs(AuthProvider, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsx(PixelCursor, {}),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(Toaster, { theme: "dark", position: "bottom-right" }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx(AppShell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) })
+  ] }) });
+}
+const $$splitComponentImporter$9 = () => import("./settings-BcJ39dKN.mjs");
+const Route$9 = createFileRoute("/settings")({
+  component: lazyRouteComponent($$splitComponentImporter$9, "component")
+});
+const $$splitComponentImporter$8 = () => import("./saved-0hkXD844.mjs");
+const Route$8 = createFileRoute("/saved")({
+  component: lazyRouteComponent($$splitComponentImporter$8, "component")
+});
+const $$splitComponentImporter$7 = () => import("./notifications-B6j0qDoX.mjs");
+const Route$7 = createFileRoute("/notifications")({
+  component: lazyRouteComponent($$splitComponentImporter$7, "component")
+});
+const $$splitComponentImporter$6 = () => import("./new-DIFJUnqZ.mjs");
+const Route$6 = createFileRoute("/new")({
+  component: lazyRouteComponent($$splitComponentImporter$6, "component")
+});
+const $$splitComponentImporter$5 = () => import("./explore-B30ugdsa.mjs");
+const Route$5 = createFileRoute("/explore")({
+  component: lazyRouteComponent($$splitComponentImporter$5, "component"),
+  validateSearch: (s) => ({
+    q: s.q || ""
+  })
+});
+const $$splitComponentImporter$4 = () => import("./collab-DKRKGrvk.mjs");
+const Route$4 = createFileRoute("/collab")({
+  component: lazyRouteComponent($$splitComponentImporter$4, "component")
+});
+const $$splitComponentImporter$3 = () => import("./auth-CIDpGLla.mjs");
+const Route$3 = createFileRoute("/auth")({
+  component: lazyRouteComponent($$splitComponentImporter$3, "component")
+});
+const $$splitComponentImporter$2 = () => import("./index-Zrp9Ci0w.mjs");
+const Route$2 = createFileRoute("/")({
+  component: lazyRouteComponent($$splitComponentImporter$2, "component")
+});
+const $$splitComponentImporter$1 = () => import("./u._username-CbT_Dhfu.mjs");
+const Route$1 = createFileRoute("/u/$username")({
+  component: lazyRouteComponent($$splitComponentImporter$1, "component")
+});
+const $$splitComponentImporter = () => import("./p._id-CPpSk7cA.mjs");
+const Route = createFileRoute("/p/$id")({
+  component: lazyRouteComponent($$splitComponentImporter, "component")
+});
+const SettingsRoute = Route$9.update({
+  id: "/settings",
+  path: "/settings",
+  getParentRoute: () => Route$a
+});
+const SavedRoute = Route$8.update({
+  id: "/saved",
+  path: "/saved",
+  getParentRoute: () => Route$a
+});
+const NotificationsRoute = Route$7.update({
+  id: "/notifications",
+  path: "/notifications",
+  getParentRoute: () => Route$a
+});
+const NewRoute = Route$6.update({
+  id: "/new",
+  path: "/new",
+  getParentRoute: () => Route$a
+});
+const ExploreRoute = Route$5.update({
+  id: "/explore",
+  path: "/explore",
+  getParentRoute: () => Route$a
+});
+const CollabRoute = Route$4.update({
+  id: "/collab",
+  path: "/collab",
+  getParentRoute: () => Route$a
+});
+const AuthRoute = Route$3.update({
+  id: "/auth",
+  path: "/auth",
+  getParentRoute: () => Route$a
+});
+const IndexRoute = Route$2.update({
+  id: "/",
+  path: "/",
+  getParentRoute: () => Route$a
+});
+const UUsernameRoute = Route$1.update({
+  id: "/u/$username",
+  path: "/u/$username",
+  getParentRoute: () => Route$a
+});
+const PIdRoute = Route.update({
+  id: "/p/$id",
+  path: "/p/$id",
+  getParentRoute: () => Route$a
+});
+const rootRouteChildren = {
+  IndexRoute,
+  AuthRoute,
+  CollabRoute,
+  ExploreRoute,
+  NewRoute,
+  NotificationsRoute,
+  SavedRoute,
+  SettingsRoute,
+  PIdRoute,
+  UUsernameRoute
+};
+const routeTree = Route$a._addFileChildren(rootRouteChildren)._addFileTypes();
+const getRouter = () => {
+  const queryClient = new QueryClient();
+  const router2 = createRouter({
+    routeTree,
+    context: { queryClient },
+    scrollRestoration: true,
+    defaultPreloadStaleTime: 0
+  });
+  return router2;
+};
+const router = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  getRouter
+}, Symbol.toStringTag, { value: "Module" }));
+export {
+  Avatar as A,
+  Route$5 as R,
+  Route$1 as a,
+  Route as b,
+  router as r,
+  useAuth as u
+};
