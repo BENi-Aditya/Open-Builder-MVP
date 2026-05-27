@@ -12,6 +12,19 @@ function createSupabaseClient() {
       ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
     ];
     const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
+    
+    // On the server, we don't want to throw and crash the whole process
+    // especially during the initial import.
+    if (typeof window === 'undefined') {
+      console.error(`[Supabase SSR] ${message}`);
+      // Return a dummy client to avoid crashing the server on startup
+      return createClient<Database>(
+        SUPABASE_URL || 'https://placeholder.supabase.co', 
+        SUPABASE_PUBLISHABLE_KEY || 'placeholder', 
+        { auth: { persistSession: false } }
+      );
+    }
+    
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }

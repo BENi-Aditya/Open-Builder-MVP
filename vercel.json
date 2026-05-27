@@ -1,8 +1,0 @@
-{
-  "rewrites": [
-    {
-      "source": "/(favicon.ico|logo.webp)",
-      "destination": "/$1"
-    }
-  ]
-}
