@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
-  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search,
+  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/explore", label: "Explore", icon: Compass },
   { to: "/collab", label: "Collab", icon: Users },
   { to: "/notifications", label: "Inbox", icon: Bell },
+  { to: "/chat", label: "Messages", icon: MessageSquare },
   { to: "/saved", label: "Saved", icon: Bookmark },
 ];
 

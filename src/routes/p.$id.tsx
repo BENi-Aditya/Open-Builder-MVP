@@ -21,6 +21,7 @@ function ProjectPage() {
   const [logFile, setLogFile] = useState<File | null>(null);
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [commentLikes, setCommentLikes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
@@ -28,17 +29,18 @@ function ProjectPage() {
     const { data } = await supabase.from("projects").select("*, owner:profiles!projects_owner_id_fkey(id, username, display_name, avatar_url, bio)").eq("id", id).maybeSingle();
     setProject(data);
     const [{ data: cm }, { data: lg }] = await Promise.all([
-      supabase.from("comments").select("id, body, created_at, user_id, user:profiles!comments_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
+      supabase.from("comments").select("id, body, created_at, user_id, like_count, user:profiles!comments_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
       supabase.from("build_logs").select("id, body, image_url, created_at, user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
     ]);
     setComments(cm ?? []);
     setLogs(lg ?? []);
     if (user) {
-      const [{ data: lk }, { data: sv }] = await Promise.all([
+      const [{ data: lk }, { data: sv }, { data: clk }] = await Promise.all([
         supabase.from("likes").select("user_id").eq("user_id", user.id).eq("project_id", id).maybeSingle(),
         supabase.from("saves").select("user_id").eq("user_id", user.id).eq("project_id", id).maybeSingle(),
+        supabase.from("comment_likes").select("comment_id").eq("user_id", user.id),
       ]);
-      setLiked(!!lk); setSaved(!!sv);
+      setLiked(!!lk); setSaved(!!sv); setCommentLikes(clk?.map(l => l.comment_id) ?? []);
     }
     setLoading(false);
   };
@@ -57,6 +59,19 @@ function ProjectPage() {
     if (!user) return toast.error("Sign in first");
     if (saved) { await supabase.from("saves").delete().eq("user_id", user.id).eq("project_id", id); setSaved(false); }
     else { await supabase.from("saves").insert({ user_id: user.id, project_id: id }); setSaved(true); }
+  };
+  const toggleCommentLike = async (cid: string) => {
+    if (!user) return toast.error("Sign in first");
+    const isLiked = commentLikes.includes(cid);
+    if (isLiked) {
+      await supabase.from("comment_likes").delete().eq("user_id", user.id).eq("comment_id", cid);
+      setCommentLikes(prev => prev.filter(id => id !== cid));
+      setComments(prev => prev.map(c => c.id === cid ? { ...c, like_count: Math.max(0, c.like_count - 1) } : c));
+    } else {
+      await supabase.from("comment_likes").insert({ user_id: user.id, comment_id: cid });
+      setCommentLikes(prev => [...prev, cid]);
+      setComments(prev => prev.map(c => c.id === cid ? { ...c, like_count: c.like_count + 1 } : c));
+    }
   };
   const addComment = async () => {
     if (!user || !comment.trim()) return;
@@ -175,21 +190,33 @@ function ProjectPage() {
                 </div>
               ) : <Link to="/auth" className="text-sm text-primary mb-4 block">Sign in to comment →</Link>}
               <div className="space-y-3">
-                {comments.map((c) => (
-                  <div key={c.id} className="flex gap-3 group">
-                    <Avatar profile={c.user} size={32} />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-baseline gap-2">
-                        <Link to="/u/$username" params={{ username: c.user.username }} className="font-bold text-sm">{c.user.display_name || c.user.username}</Link>
-                        <span className="text-[10px] font-mono text-muted-foreground">{formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}</span>
-                        {(user?.id === c.user_id || isOwner) && (
-                          <button onClick={() => deleteComment(c.id)} className="ml-auto opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="w-3 h-3" /></button>
-                        )}
+                {comments.map((c) => {
+                  const isLiked = commentLikes.includes(c.id);
+                  return (
+                    <div key={c.id} className="flex gap-3 group">
+                      <Avatar profile={c.user} size={32} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2">
+                          <Link to="/u/$username" params={{ username: c.user.username }} className="font-bold text-sm">{c.user.display_name || c.user.username}</Link>
+                          <span className="text-[10px] font-mono text-muted-foreground">{formatDistanceToNow(new Date(c.created_at), { addSuffix: true })}</span>
+                          <div className="ml-auto flex items-center gap-2">
+                            <button 
+                              onClick={() => toggleCommentLike(c.id)} 
+                              className={`flex items-center gap-1 text-[10px] font-bold uppercase transition-colors ${isLiked ? 'text-pink-500' : 'text-muted-foreground hover:text-pink-500'}`}
+                            >
+                              <Heart className={`w-3 h-3 ${isLiked ? 'fill-current' : ''}`} />
+                              {c.like_count > 0 && c.like_count}
+                            </button>
+                            {(user?.id === c.user_id || isOwner) && (
+                              <button onClick={() => deleteComment(c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity"><Trash2 className="w-3 h-3" /></button>
+                            )}
+                          </div>
+                        </div>
+                        <p className="text-sm mt-0.5">{c.body}</p>
                       </div>
-                      <p className="text-sm mt-0.5">{c.body}</p>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
           </div>

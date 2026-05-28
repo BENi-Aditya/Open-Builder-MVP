@@ -11,6 +11,7 @@ export const Route = createFileRoute("/collab")({ component: CollabPage });
 function CollabPage() {
   const { user } = useAuth();
   const [posts, setPosts] = useState<CollabPost[]>([]);
+  const [myRequests, setMyRequests] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [applyTo, setApplyTo] = useState<CollabPost | null>(null);
   const [msg, setMsg] = useState("");
@@ -23,8 +24,13 @@ function CollabPage() {
   const load = async () => {
     const { data } = await supabase.from("collab_posts").select("id, title, description, role_needed, tech_tags, is_open, created_at, user:profiles!collab_posts_user_id_fkey(id, username, display_name, avatar_url), project:projects(id, title)").order("created_at", { ascending: false });
     setPosts((data ?? []) as unknown as CollabPost[]);
+
+    if (user) {
+      const { data: reqs } = await supabase.from("collab_requests").select("post_id").eq("sender_id", user.id);
+      setMyRequests((reqs ?? []).map(r => r.post_id));
+    }
   };
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); }, [user?.id]);
 
   const create = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,9 +47,33 @@ function CollabPage() {
 
   const apply = async () => {
     if (!user || !applyTo) return;
-    const { error } = await supabase.from("collab_requests").insert({ post_id: applyTo.id, sender_id: user.id, message: msg });
-    if (error) return toast.error(error.message);
+    
+    // Check if already applied
+    if (myRequests.includes(applyTo.id)) {
+      toast.error("You have already applied to this collab");
+      setApplyTo(null); setMsg("");
+      return;
+    }
+
+    const { data: request, error } = await supabase
+      .from("collab_requests")
+      .insert({ post_id: applyTo.id, sender_id: user.id, message: msg })
+      .select()
+      .single();
+    
+    if (error) {
+      if (error.code === '23505') {
+        toast.error("You have already applied to this collab");
+        setMyRequests(prev => [...prev, applyTo.id]);
+      } else {
+        toast.error(error.message);
+      }
+      setApplyTo(null); setMsg("");
+      return;
+    }
+
     toast.success("Request sent");
+    setMyRequests(prev => [...prev, applyTo.id]);
     setApplyTo(null); setMsg("");
   };
 
@@ -63,7 +93,14 @@ function CollabPage() {
         <p className="text-muted-foreground text-center py-12">No collab posts yet. Be first.</p>
       ) : (
         <div className="grid md:grid-cols-2 gap-4">
-          {posts.map((p) => <CollabCard key={p.id} post={p} onApply={user && p.user.id !== user.id ? () => setApplyTo(p) : undefined} />)}
+          {posts.map((p) => (
+            <CollabCard 
+              key={p.id} 
+              post={p} 
+              onApply={user && p.user.id !== user.id && !myRequests.includes(p.id) ? () => setApplyTo(p) : undefined} 
+              isApplied={!!(user && myRequests.includes(p.id))}
+            />
+          ))}
         </div>
       )}
 

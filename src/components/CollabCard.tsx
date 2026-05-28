@@ -15,7 +15,7 @@ export type CollabPost = {
   project?: { id: string; title: string } | null;
 };
 
-export function CollabCard({ post, onApply }: { post: CollabPost; onApply?: () => void }) {
+export function CollabCard({ post, onApply, isApplied }: { post: CollabPost; onApply?: () => void; isApplied?: boolean }) {
   return (
     <article className="brutal-card p-5 flex flex-col gap-3" style={{ background: "linear-gradient(135deg, var(--card) 0%, color-mix(in oklab, var(--grape) 10%, var(--card)) 100%)" }}>
       <div className="flex items-start justify-between gap-2">
@@ -23,6 +23,7 @@ export function CollabCard({ post, onApply }: { post: CollabPost; onApply?: () =
           <span className="pill bg-[var(--grape)] text-white border-white"><Users className="w-3 h-3 mr-1" /> collab</span>
           {post.role_needed && <span className="pill text-[var(--tangerine)]">{post.role_needed}</span>}
           {!post.is_open && <span className="pill text-muted-foreground">closed</span>}
+          {isApplied && <span className="pill bg-green-500/20 text-green-500 border-green-500/50">Applied</span>}
         </div>
         <span className="text-[10px] font-mono text-muted-foreground">{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
       </div>
