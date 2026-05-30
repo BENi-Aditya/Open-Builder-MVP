@@ -60,6 +60,26 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const hasSupabaseConfig = Boolean(
+    import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+  );
+
+  if (!hasSupabaseConfig) {
+    return (
+      <div className="min-h-screen grid place-items-center p-8 text-center">
+        <div>
+          <div className="font-display text-3xl font-black">OpenBuilder is deploying</div>
+          <p className="mt-2 text-muted-foreground font-mono text-xs">
+            Missing Supabase environment variables. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in
+            Vercel, then redeploy.
+          </p>
+          <button onClick={() => location.reload()} className="brutal-btn mt-4">
+            Reload
+          </button>
+        </div>
+      </div>
+    );
+  }
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

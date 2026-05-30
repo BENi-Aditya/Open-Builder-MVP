@@ -2,25 +2,14 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
-// We import the handler creator from TanStack Start
-import { createStartHandler } from "@tanstack/react-start/server";
-import { getRouter } from "./router";
-import { startInstance } from "./start";
+import * as serverEntryImport from "@tanstack/react-start/server-entry";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
 };
 
-let serverEntryPromise: Promise<ServerEntry> | undefined;
-
-async function getServerEntry(): Promise<ServerEntry> {
-  if (!serverEntryPromise) {
-    serverEntryPromise = import("@tanstack/react-start/server-entry").then(
-      (m) => ((m as { default?: ServerEntry }).default ?? (m as unknown as ServerEntry)),
-    );
-  }
-  return serverEntryPromise;
-}
+const serverEntry = ((serverEntryImport as unknown as { default?: ServerEntry }).default ??
+  (serverEntryImport as unknown as ServerEntry)) as ServerEntry;
 
 function brandedErrorResponse(error?: unknown): Response {
   const message = error instanceof Error ? error.message : String(error || "Unknown error");
@@ -109,8 +98,7 @@ export default {
     }
 
     try {
-      const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = await serverEntry.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       return brandedErrorResponse(error);
