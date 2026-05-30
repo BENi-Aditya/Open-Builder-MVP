@@ -20,7 +20,10 @@ function consumeLastCapturedError() {
   lastCapturedError = void 0;
   return error;
 }
-function renderErrorPage() {
+function renderErrorPage(errorMessage) {
+  const displayError = errorMessage ? `<div style="margin-top: 1rem; padding: 0.5rem; background: #fee2e2; color: #991b1b; border-radius: 0.25rem; font-family: monospace; font-size: 0.75rem; text-align: left; overflow-x: auto;">
+        <strong>Error:</strong> ${errorMessage}
+      </div>` : "";
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -42,7 +45,8 @@ function renderErrorPage() {
     <div class="card">
       <h1>This page didn't load</h1>
       <p>Something went wrong on our end. You can try refreshing or head back home.</p>
-      <div class="actions">
+      ${displayError}
+      <div class="actions" style="margin-top: 1.5rem;">
         <button class="primary" onclick="location.reload()">Try again</button>
         <a class="secondary" href="/">Go home</a>
       </div>
@@ -53,17 +57,34 @@ function renderErrorPage() {
 let serverEntryPromise;
 async function getServerEntry() {
   if (!serverEntryPromise) {
-    serverEntryPromise = import("./server-RwUdH3ok.mjs").then((n) => n.s).then(
+    serverEntryPromise = import("./server-CxMijKGk.mjs").then((n) => n.s).then(
       (m) => m.default ?? m
     );
   }
   return serverEntryPromise;
 }
-function brandedErrorResponse() {
-  return new Response(renderErrorPage(), {
+function brandedErrorResponse(error) {
+  const message = error instanceof Error ? error.message : String(error || "Unknown error");
+  console.error("Critical SSR Error:", message);
+  if (error instanceof Error && error.stack) {
+    console.error("Stack trace:", error.stack);
+  }
+  const finalMessage = message.trim() || "An unexpected error occurred during server-side rendering.";
+  return new Response(renderErrorPage(finalMessage), {
     status: 500,
     headers: { "content-type": "text/html; charset=utf-8" }
   });
+}
+async function normalizeCatastrophicSsrResponse(response) {
+  if (response.status < 500) return response;
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes("application/json")) return response;
+  const body = await response.clone().text();
+  if (!isCatastrophicSsrErrorBody(body, response.status)) {
+    return response;
+  }
+  const error = consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`);
+  return brandedErrorResponse(error);
 }
 function isCatastrophicSsrErrorBody(body, responseStatus) {
   let payload;
@@ -82,26 +103,29 @@ function isCatastrophicSsrErrorBody(body, responseStatus) {
   }
   return fields.unhandled === true && fields.message === "HTTPError" && (fields.status === void 0 || fields.status === responseStatus);
 }
-async function normalizeCatastrophicSsrResponse(response) {
-  if (response.status < 500) return response;
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) return response;
-  const body = await response.clone().text();
-  if (!isCatastrophicSsrErrorBody(body, response.status)) {
-    return response;
-  }
-  console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
-  return brandedErrorResponse();
-}
 const server = {
   async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+    if (url.pathname === "/favicon.ico" || url.pathname === "/robots.txt" || url.pathname.startsWith("/assets/")) {
+      return new Response(null, { status: 404 });
+    }
+    if (env && typeof env === "object") {
+      if (env.VITE_SUPABASE_URL) process.env.VITE_SUPABASE_URL = env.VITE_SUPABASE_URL;
+      if (env.VITE_SUPABASE_PUBLISHABLE_KEY) process.env.VITE_SUPABASE_PUBLISHABLE_KEY = env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      if (env.SUPABASE_URL) process.env.SUPABASE_URL = env.SUPABASE_URL;
+      if (env.SUPABASE_PUBLISHABLE_KEY) process.env.SUPABASE_PUBLISHABLE_KEY = env.SUPABASE_PUBLISHABLE_KEY;
+      Object.entries(env).forEach(([key, value]) => {
+        if (typeof value === "string") {
+          process.env[key] = value;
+        }
+      });
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
-      console.error(error);
-      return brandedErrorResponse();
+      return brandedErrorResponse(error);
     }
   }
 };

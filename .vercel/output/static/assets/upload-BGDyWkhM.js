@@ -1,1 +1,0 @@
-import{s as r}from"./index-DaC-Jo4i.js";async function u(o,e,s="uploads"){const p=o.name.split(".").pop()?.toLowerCase()||"bin",t=`${e}/${s}/${crypto.randomUUID()}.${p}`,{error:a}=await r.storage.from("media").upload(t,o,{upsert:!1,contentType:o.type});if(a)throw a;const{data:n}=r.storage.from("media").getPublicUrl(t);return n.publicUrl}export{u};

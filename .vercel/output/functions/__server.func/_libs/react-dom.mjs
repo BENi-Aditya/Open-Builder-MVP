@@ -1,4 +1,4 @@
-import { a as requireReact, g as getDefaultExportFromCjs } from "./react.mjs";
+import { b as requireReact, g as getDefaultExportFromCjs } from "./react.mjs";
 import require$$0 from "util";
 import require$$1 from "crypto";
 import require$$2 from "async_hooks";
@@ -10776,5 +10776,6 @@ var server_nodeExports = requireServer_node();
 const ReactDOMServer = /* @__PURE__ */ getDefaultExportFromCjs(server_nodeExports);
 export {
   ReactDOM as R,
-  ReactDOMServer as a
+  ReactDOMServer as a,
+  reactDomExports as r
 };
