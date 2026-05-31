@@ -16,6 +16,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "OpenBuilder" },
       { property: "og:description", content: "Build publicly. Collaborate openly." },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/logo.webp" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "/logo.webp" },
     ],
     links: [
       { rel: "icon", href: "/logo.webp", type: "image/webp" },
