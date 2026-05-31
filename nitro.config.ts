@@ -1,4 +1,3 @@
 export default {
-  preset: "netlify",
-  node: true,
+  preset: "netlify-static",
 };
