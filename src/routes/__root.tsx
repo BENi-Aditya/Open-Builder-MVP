@@ -11,7 +11,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "OpenBuilder — Build publicly. Collaborate openly." },
+      { title: "OpenBuilder" },
       { name: "description", content: "OpenBuilder is the social ecosystem for student builders. Ship projects, post build logs, find collaborators." },
       { property: "og:title", content: "OpenBuilder" },
       { property: "og:description", content: "Build publicly. Collaborate openly." },
