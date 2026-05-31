@@ -1,6 +1,6 @@
 import { j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
-import { A as Avatar } from "./router-mgpDFoQE.mjs";
+import { A as Avatar } from "./router-vnISQ9uA.mjs";
 import { n as Users, a as ArrowRight } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 function CollabCard({ post, onApply, isApplied }) {

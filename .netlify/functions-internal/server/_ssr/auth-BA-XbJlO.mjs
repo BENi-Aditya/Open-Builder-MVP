@@ -1,7 +1,7 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { d as useNavigate } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth } from "./router-mgpDFoQE.mjs";
+import { u as useAuth } from "./router-vnISQ9uA.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";

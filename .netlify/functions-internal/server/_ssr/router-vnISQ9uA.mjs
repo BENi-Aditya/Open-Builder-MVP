@@ -279,18 +279,24 @@ function PixelCursor() {
     ] }) })
   ] });
 }
-const Route$b = createRootRouteWithContext()({
+const Route$c = createRootRouteWithContext()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "OpenBuilder — Build publicly. Collaborate openly." },
+      { title: "OpenBuilder" },
       { name: "description", content: "OpenBuilder is the social ecosystem for student builders. Ship projects, post build logs, find collaborators." },
       { property: "og:title", content: "OpenBuilder" },
       { property: "og:description", content: "Build publicly. Collaborate openly." },
-      { property: "og:type", content: "website" }
+      { property: "og:type", content: "website" },
+      { property: "og:image", content: "/logo.webp" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "/logo.webp" }
     ],
     links: [
+      { rel: "icon", href: "/logo.webp", type: "image/webp" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "" },
@@ -318,7 +324,18 @@ const Route$b = createRootRouteWithContext()({
 });
 function RootShell({ children }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("html", { lang: "en", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx("head", { children: /* @__PURE__ */ jsxRuntimeExports.jsx(HeadContent, {}) }),
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("head", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(HeadContent, {}),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("script", { async: true, src: "https://www.googletagmanager.com/gtag/js?id=G-2FM0TXVVTS" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("script", { dangerouslySetInnerHTML: {
+        __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-2FM0TXVVTS');
+          `
+      } })
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("body", { children: [
       children,
       /* @__PURE__ */ jsxRuntimeExports.jsx(Scripts, {})
@@ -326,7 +343,7 @@ function RootShell({ children }) {
   ] });
 }
 function RootComponent() {
-  const { queryClient } = Route$b.useRouteContext();
+  const { queryClient } = Route$c.useRouteContext();
   const hasSupabaseConfig = Boolean(
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5cHdrb3BobmJjaW16YnN2ZWluIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MDczMTcsImV4cCI6MjA5NTM4MzMxN30.dtkpAmvJvWchlcV5ohCAeA-56PDTTAj9i6belkU4LRU"
   );
@@ -343,110 +360,119 @@ function RootComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(AppShell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) })
   ] }) });
 }
-const $$splitComponentImporter$a = () => import("./settings-DoCehyPz.mjs");
-const Route$a = createFileRoute("/settings")({
+const $$splitComponentImporter$b = () => import("./settings-DMxkFJ2N.mjs");
+const Route$b = createFileRoute("/settings")({
+  component: lazyRouteComponent($$splitComponentImporter$b, "component")
+});
+const $$splitComponentImporter$a = () => import("./seed-CKGNDvVE.mjs");
+const Route$a = createFileRoute("/seed")({
   component: lazyRouteComponent($$splitComponentImporter$a, "component")
 });
-const $$splitComponentImporter$9 = () => import("./saved-DNeLlAur.mjs");
+const $$splitComponentImporter$9 = () => import("./saved-DOX_tGVM.mjs");
 const Route$9 = createFileRoute("/saved")({
   component: lazyRouteComponent($$splitComponentImporter$9, "component")
 });
-const $$splitComponentImporter$8 = () => import("./notifications-DPW7-qtE.mjs");
+const $$splitComponentImporter$8 = () => import("./notifications-Da3NmUAa.mjs");
 const Route$8 = createFileRoute("/notifications")({
   component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-const $$splitComponentImporter$7 = () => import("./new-CNTSBZNR.mjs");
+const $$splitComponentImporter$7 = () => import("./new-Ce1uk125.mjs");
 const Route$7 = createFileRoute("/new")({
   component: lazyRouteComponent($$splitComponentImporter$7, "component")
 });
-const $$splitComponentImporter$6 = () => import("./explore-C4pzUVFx.mjs");
+const $$splitComponentImporter$6 = () => import("./explore-hQfekSeW.mjs");
 const Route$6 = createFileRoute("/explore")({
   component: lazyRouteComponent($$splitComponentImporter$6, "component"),
   validateSearch: (s) => ({
     q: s.q || ""
   })
 });
-const $$splitComponentImporter$5 = () => import("./collab-poTY2BOu.mjs");
+const $$splitComponentImporter$5 = () => import("./collab-CqmeqWE4.mjs");
 const Route$5 = createFileRoute("/collab")({
   component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
-const $$splitComponentImporter$4 = () => import("./chat-Bv23KRco.mjs");
+const $$splitComponentImporter$4 = () => import("./chat-Ccic9f-v.mjs");
 const Route$4 = createFileRoute("/chat")({
   component: lazyRouteComponent($$splitComponentImporter$4, "component"),
   validateSearch: (s) => ({
     id: s.id || void 0
   })
 });
-const $$splitComponentImporter$3 = () => import("./auth-B9XGA6xI.mjs");
+const $$splitComponentImporter$3 = () => import("./auth-BA-XbJlO.mjs");
 const Route$3 = createFileRoute("/auth")({
   component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-const $$splitComponentImporter$2 = () => import("./index-BGMwndJa.mjs");
+const $$splitComponentImporter$2 = () => import("./index-B4-gBE_V.mjs");
 const Route$2 = createFileRoute("/")({
   component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-const $$splitComponentImporter$1 = () => import("./u._username-Da7olnNb.mjs");
+const $$splitComponentImporter$1 = () => import("./u._username-7hg8rQak.mjs");
 const Route$1 = createFileRoute("/u/$username")({
   component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-const $$splitComponentImporter = () => import("./p._id-BIem0EnN.mjs");
+const $$splitComponentImporter = () => import("./p._id-ZUnONbap.mjs");
 const Route = createFileRoute("/p/$id")({
   component: lazyRouteComponent($$splitComponentImporter, "component")
 });
-const SettingsRoute = Route$a.update({
+const SettingsRoute = Route$b.update({
   id: "/settings",
   path: "/settings",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
+});
+const SeedRoute = Route$a.update({
+  id: "/seed",
+  path: "/seed",
+  getParentRoute: () => Route$c
 });
 const SavedRoute = Route$9.update({
   id: "/saved",
   path: "/saved",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const NotificationsRoute = Route$8.update({
   id: "/notifications",
   path: "/notifications",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const NewRoute = Route$7.update({
   id: "/new",
   path: "/new",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const ExploreRoute = Route$6.update({
   id: "/explore",
   path: "/explore",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const CollabRoute = Route$5.update({
   id: "/collab",
   path: "/collab",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const ChatRoute = Route$4.update({
   id: "/chat",
   path: "/chat",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const AuthRoute = Route$3.update({
   id: "/auth",
   path: "/auth",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const IndexRoute = Route$2.update({
   id: "/",
   path: "/",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const UUsernameRoute = Route$1.update({
   id: "/u/$username",
   path: "/u/$username",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const PIdRoute = Route.update({
   id: "/p/$id",
   path: "/p/$id",
-  getParentRoute: () => Route$b
+  getParentRoute: () => Route$c
 });
 const rootRouteChildren = {
   IndexRoute,
@@ -457,11 +483,12 @@ const rootRouteChildren = {
   NewRoute,
   NotificationsRoute,
   SavedRoute,
+  SeedRoute,
   SettingsRoute,
   PIdRoute,
   UUsernameRoute
 };
-const routeTree = Route$b._addFileChildren(rootRouteChildren)._addFileTypes();
+const routeTree = Route$c._addFileChildren(rootRouteChildren)._addFileTypes();
 const getRouter = () => {
   const queryClient = new QueryClient();
   const router2 = createRouter({

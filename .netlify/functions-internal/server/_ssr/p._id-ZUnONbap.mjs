@@ -1,7 +1,7 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { c as Route, u as useAuth, A as Avatar } from "./router-mgpDFoQE.mjs";
+import { c as Route, u as useAuth, A as Avatar } from "./router-vnISQ9uA.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
 import { d as Heart, b as Bookmark, E as ExternalLink, G as Github, Z as Zap, f as MessageCircle, j as Send, T as Trash2 } from "../_libs/lucide-react.mjs";

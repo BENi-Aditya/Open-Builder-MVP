@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SeedRouteImport } from './routes/seed'
 import { Route as SavedRouteImport } from './routes/saved'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as NewRouteImport } from './routes/new'
@@ -24,6 +25,11 @@ import { Route as PIdRouteImport } from './routes/p.$id'
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SeedRoute = SeedRouteImport.update({
+  id: '/seed',
+  path: '/seed',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SavedRoute = SavedRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/new': typeof NewRoute
   '/notifications': typeof NotificationsRoute
   '/saved': typeof SavedRoute
+  '/seed': typeof SeedRoute
   '/settings': typeof SettingsRoute
   '/p/$id': typeof PIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/new': typeof NewRoute
   '/notifications': typeof NotificationsRoute
   '/saved': typeof SavedRoute
+  '/seed': typeof SeedRoute
   '/settings': typeof SettingsRoute
   '/p/$id': typeof PIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/new': typeof NewRoute
   '/notifications': typeof NotificationsRoute
   '/saved': typeof SavedRoute
+  '/seed': typeof SeedRoute
   '/settings': typeof SettingsRoute
   '/p/$id': typeof PIdRoute
   '/u/$username': typeof UUsernameRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/notifications'
     | '/saved'
+    | '/seed'
     | '/settings'
     | '/p/$id'
     | '/u/$username'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/notifications'
     | '/saved'
+    | '/seed'
     | '/settings'
     | '/p/$id'
     | '/u/$username'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/notifications'
     | '/saved'
+    | '/seed'
     | '/settings'
     | '/p/$id'
     | '/u/$username'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   NewRoute: typeof NewRoute
   NotificationsRoute: typeof NotificationsRoute
   SavedRoute: typeof SavedRoute
+  SeedRoute: typeof SeedRoute
   SettingsRoute: typeof SettingsRoute
   PIdRoute: typeof PIdRoute
   UUsernameRoute: typeof UUsernameRoute
@@ -180,6 +193,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/seed': {
+      id: '/seed'
+      path: '/seed'
+      fullPath: '/seed'
+      preLoaderRoute: typeof SeedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/saved': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   NewRoute: NewRoute,
   NotificationsRoute: NotificationsRoute,
   SavedRoute: SavedRoute,
+  SeedRoute: SeedRoute,
   SettingsRoute: SettingsRoute,
   PIdRoute: PIdRoute,
   UUsernameRoute: UUsernameRoute,

@@ -1,3 +1,8 @@
 export default {
-  preset: "netlify-static",
+  preset: "netlify",
+  node: true,
+  prerender: {
+    crawlLinks: false,
+    routes: []
+  }
 };
