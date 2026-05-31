@@ -1,9 +1,4 @@
 export default {
-  preset: "vercel",
+  preset: "netlify",
   node: true,
-  vercel: {
-    functions: {
-      runtime: "nodejs22.x",
-    },
-  },
 };

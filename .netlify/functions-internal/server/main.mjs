@@ -86,9 +86,9 @@ function defaultHandler(error, event) {
 }
 const errorHandlers = [errorHandler$1];
 async function errorHandler(error, event) {
-  for (const handler of errorHandlers) {
+  for (const handler2 of errorHandlers) {
     try {
-      const response = await handler(error, event, { defaultHandler });
+      const response = await handler2(error, event, { defaultHandler });
       if (response) {
         return response;
       }
@@ -201,44 +201,23 @@ function getRouteRules(method, pathname) {
     routeRuleMiddleware: middleware
   };
 }
-const ISR_URL_PARAM = "__isr_route";
-function isrRouteRewrite(reqUrl, xNowRouteMatches) {
-  if (xNowRouteMatches) {
-    const isrURL = new URLSearchParams(xNowRouteMatches).get(ISR_URL_PARAM);
-    if (isrURL) {
-      return [decodeURIComponent(isrURL), ""];
-    }
-  } else {
-    const queryIndex = reqUrl.indexOf("?");
-    if (queryIndex !== -1) {
-      const params = new URLSearchParams(reqUrl.slice(queryIndex + 1));
-      const isrURL = params.get(ISR_URL_PARAM);
-      if (isrURL) {
-        params.delete(ISR_URL_PARAM);
-        return [decodeURIComponent(isrURL), params.toString()];
-      }
-    }
-  }
-}
 const nitroApp = useNitroApp();
-const vercel_web = { fetch(req, context) {
-  const isrURL = isrRouteRewrite(req.url, req.headers.get("x-now-route-matches"));
-  if (isrURL) {
-    const { routeRules } = getRouteRules("", isrURL[0]);
-    if (routeRules?.isr) {
-      req = new Request(new URL(isrURL[0] + (isrURL[1] ? `?${isrURL[1]}` : ""), req.url).href, req);
+const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60;
+const handler = async (req) => {
+  req.runtime ??= { name: "netlify" };
+  req.ip ??= req.headers.get("x-nf-client-connection-ip") || void 0;
+  const response = await nitroApp.fetch(req);
+  const isr = (req.context?.routeRules || {})?.isr?.options;
+  if (isr) {
+    const maxAge = typeof isr === "number" ? isr : ONE_YEAR_IN_SECONDS;
+    const revalidateDirective = typeof isr === "number" ? `stale-while-revalidate=${ONE_YEAR_IN_SECONDS}` : "must-revalidate";
+    if (!response.headers.has("Cache-Control")) {
+      response.headers.set("Cache-Control", "public, max-age=0, must-revalidate");
     }
+    response.headers.set("Netlify-CDN-Cache-Control", `public, max-age=${maxAge}, ${revalidateDirective}, durable`);
   }
-  req.runtime ??= { name: "vercel" };
-  req.runtime.vercel = { context };
-  let ip;
-  Object.defineProperty(req, "ip", { get() {
-    const h = req.headers.get("x-forwarded-for");
-    return ip ??= h?.split(",").shift()?.trim();
-  } });
-  req.waitUntil = context?.waitUntil;
-  return nitroApp.fetch(req);
-} };
+  return response;
+};
 export {
-  vercel_web as default
+  handler as default
 };
