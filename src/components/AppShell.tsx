@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
-  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare
+  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare, User
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -134,7 +134,16 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       {/* mobile bottom bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
-        {NAV.map((n) => {
+        {[
+          { to: "/", label: "Feed", icon: Home },
+          { to: "/explore", label: "Explore", icon: Compass },
+          { to: "/collab", label: "Collab", icon: Users },
+          { to: "/notifications", label: "Inbox", icon: Bell },
+          { to: "/chat", label: "Messages", icon: MessageSquare },
+          profile
+            ? { to: `/u/${profile.username}`, label: "Profile", icon: User }
+            : { to: "/auth", label: "Profile", icon: User },
+        ].map((n) => {
           const active = loc.pathname === n.to || (n.to !== "/" && loc.pathname.startsWith(n.to));
           return (
             <Link

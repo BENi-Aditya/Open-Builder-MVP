@@ -1,6 +1,6 @@
 import { j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
-import { A as Avatar } from "./router-CUPGUMYq.mjs";
+import { A as Avatar } from "./router-DrZjJ8Fc.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 import { Z as Zap } from "../_libs/lucide-react.mjs";
 function BuildLogCard({ log }) {

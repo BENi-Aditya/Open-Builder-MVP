@@ -1,9 +1,9 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { P as ProjectCard } from "./ProjectCard-CxNhLHcs.mjs";
-import { R as Route$6, A as Avatar } from "./router-CUPGUMYq.mjs";
-import { F as FollowButton } from "./FollowButton-CJDXzybV.mjs";
+import { P as ProjectCard } from "./ProjectCard-Nw7l4hhS.mjs";
+import { R as Route$6, A as Avatar } from "./router-DrZjJ8Fc.mjs";
+import { F as FollowButton } from "./FollowButton-BT9d2lhI.mjs";
 import "../_libs/sonner.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";

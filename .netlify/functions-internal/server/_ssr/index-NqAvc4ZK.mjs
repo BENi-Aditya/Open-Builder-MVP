@@ -1,13 +1,13 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth, A as Avatar } from "./router-CUPGUMYq.mjs";
-import { P as ProjectCard } from "./ProjectCard-CxNhLHcs.mjs";
-import { B as BuildLogCard } from "./BuildLogCard-DdABlUWK.mjs";
-import { C as CollabCard } from "./CollabCard-DiKtYen8.mjs";
+import { u as useAuth, A as Avatar } from "./router-DrZjJ8Fc.mjs";
+import { P as ProjectCard } from "./ProjectCard-Nw7l4hhS.mjs";
+import { B as BuildLogCard } from "./BuildLogCard-C1xug8P4.mjs";
+import { C as CollabCard } from "./CollabCard-CmZSIbmi.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { l as Rocket, p as Sparkles, F as Flame, q as Users, X, L as Link2, I as Image, Z as Zap, m as Send } from "../_libs/lucide-react.mjs";
+import { l as Rocket, p as Sparkles, F as Flame, r as Users, X, L as Link2, I as Image, Z as Zap, m as Send } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
 import "../_libs/cookie-es.mjs";
@@ -288,7 +288,7 @@ function FeedPage() {
       ] }) }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(Composer, { onPosted: load })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-1 mt-6 mb-4 border-b-2 border-white/10 overflow-x-auto", children: [{
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "sticky top-0 z-30 -mx-4 bg-background/95 px-4 pt-2 backdrop-blur-sm md:-mx-0 md:px-0", children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-1 mt-4 mb-4 border-b-2 border-white/10 overflow-x-auto", children: [{
       id: "all",
       label: "All",
       icon: Sparkles
@@ -304,7 +304,7 @@ function FeedPage() {
       /* @__PURE__ */ jsxRuntimeExports.jsx(t.icon, { className: "w-3.5 h-3.5" }),
       " ",
       t.label
-    ] }, t.id)) }),
+    ] }, t.id)) }) }),
     loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "feed-stack", children: Array.from({
       length: 4
     }).map((_, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat h-72 animate-pulse" }, i)) }) : items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat p-10 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-muted-foreground", children: [

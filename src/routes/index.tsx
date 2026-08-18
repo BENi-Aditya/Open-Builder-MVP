@@ -166,16 +166,18 @@ function FeedPage() {
         </section>
       )}
 
-      <div className="flex gap-1 mt-6 mb-4 border-b-2 border-white/10 overflow-x-auto">
-        {[
-          { id: "all", label: "All", icon: Sparkles },
-          { id: "trending", label: "Trending", icon: Flame },
-          { id: "following", label: "Following", icon: Users },
-        ].map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id as typeof tab)} className={`feed-tab flex items-center gap-2 px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
-            <t.icon className="w-3.5 h-3.5" /> {t.label}
-          </button>
-        ))}
+      <div className="sticky top-0 z-30 -mx-4 bg-background/95 px-4 pt-2 backdrop-blur-sm md:-mx-0 md:px-0">
+        <div className="flex gap-1 mt-4 mb-4 border-b-2 border-white/10 overflow-x-auto">
+          {[
+            { id: "all", label: "All", icon: Sparkles },
+            { id: "trending", label: "Trending", icon: Flame },
+            { id: "following", label: "Following", icon: Users },
+          ].map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id as typeof tab)} className={`feed-tab flex items-center gap-2 px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+              <t.icon className="w-3.5 h-3.5" /> {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
