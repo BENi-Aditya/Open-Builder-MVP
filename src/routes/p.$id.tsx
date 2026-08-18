@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "@/components/AppShell";
-import { Heart, MessageCircle, Bookmark, Github, ExternalLink, Trash2, Send, Zap } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Github, ExternalLink, Trash2, Send, Zap, Youtube } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { uploadMedia } from "@/lib/upload";
@@ -158,6 +158,7 @@ function ProjectPage() {
               <Bookmark className="w-4 h-4" fill={saved ? "currentColor" : "none"} />
             </button>
             {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer" className="brutal-btn text-xs"><ExternalLink className="w-4 h-4" /> Live</a>}
+            {project.youtube_url && <a href={project.youtube_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-btn-ghost text-xs"><Youtube className="w-4 h-4" /> Video</a>}
             {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer" className="brutal-btn brutal-btn-ghost text-xs"><Github className="w-4 h-4" /> Code</a>}
           </div>
         </div>
@@ -191,7 +192,7 @@ function ProjectPage() {
                     <li key={l.id} className="border-l-4 border-[var(--tangerine)] pl-4 py-1">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">{formatDistanceToNow(new Date(l.created_at), { addSuffix: true })}</div>
                       <p className="text-sm whitespace-pre-wrap mt-1">{l.body}</p>
-                      {l.image_url && <img src={l.image_url} alt="" className="mt-2 border-2 border-white/20 max-h-72" />}
+                      {l.image_url && <img src={l.image_url} alt="" className="mt-2 w-full max-w-full border-2 border-white/20 object-cover max-h-72" />}
                     </li>
                   ))}
                 </ol>

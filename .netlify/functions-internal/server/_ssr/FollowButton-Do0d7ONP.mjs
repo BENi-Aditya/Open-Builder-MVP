@@ -1,6 +1,6 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth } from "./router-BZVH0095.mjs";
+import { u as useAuth, d as createNotification } from "./router-rHJT1VjN.mjs";
 function FollowButton({ targetId, size = "md" }) {
   const { user } = useAuth();
   const [following, setFollowing] = reactExports.useState(false);
@@ -23,6 +23,14 @@ function FollowButton({ targetId, size = "md" }) {
     } else {
       await supabase.from("follows").insert({ follower_id: user.id, following_id: targetId });
       setFollowing(true);
+      await createNotification({
+        userId: targetId,
+        actorId: user.id,
+        type: "follow",
+        entityId: user.id,
+        entityType: "profile",
+        body: `${user.user_metadata?.username || "Someone"} started following you`
+      });
     }
   };
   const sz = size === "sm" ? "text-[10px] py-1 px-2" : "";

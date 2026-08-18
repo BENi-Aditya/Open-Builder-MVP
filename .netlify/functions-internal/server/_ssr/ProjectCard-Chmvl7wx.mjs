@@ -1,8 +1,8 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
-import { u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
+import { u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { b as Bookmark, d as Heart, f as MessageCircle, E as ExternalLink, G as Github } from "../_libs/lucide-react.mjs";
+import { b as Bookmark, e as Heart, h as MessageCircle, E as ExternalLink, G as Github } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 function ProjectCard({ project, accentSeed = 0, size = "md" }) {
   const { user } = useAuth();
@@ -24,6 +24,14 @@ function ProjectCard({ project, accentSeed = 0, size = "md" }) {
       await supabase.from("likes").insert({ user_id: user.id, project_id: project.id });
       setLiked(true);
       setLikes((n) => n + 1);
+      await createNotification({
+        userId: project.owner.id,
+        actorId: user.id,
+        type: "like",
+        entityId: project.id,
+        entityType: "project",
+        body: `${user.user_metadata?.username || "Someone"} liked your project`
+      });
     }
   };
   const toggleSave = async () => {

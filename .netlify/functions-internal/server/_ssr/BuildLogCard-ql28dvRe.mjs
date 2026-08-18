@@ -1,6 +1,6 @@
 import { j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
-import { A as Avatar } from "./router-BZVH0095.mjs";
+import { A as Avatar } from "./router-rHJT1VjN.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 import { Z as Zap } from "../_libs/lucide-react.mjs";
 function BuildLogCard({ log }) {
@@ -24,7 +24,7 @@ function BuildLogCard({ log }) {
         ] })
       ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-2 text-sm whitespace-pre-wrap", children: log.body }),
-      log.image_url && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: log.image_url, alt: "", className: "mt-3 border-2 border-white/20 max-h-96 object-cover" })
+      log.image_url && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: log.image_url, alt: "", className: "mt-3 w-full max-w-full border-2 border-white/20 object-cover max-h-96" })
     ] })
   ] });
 }

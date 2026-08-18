@@ -1,13 +1,13 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
-import { P as ProjectCard } from "./ProjectCard-CK_fWxqV.mjs";
-import { B as BuildLogCard } from "./BuildLogCard-BXFSGDJM.mjs";
-import { C as CollabCard } from "./CollabCard-CoI4d1IZ.mjs";
+import { u as useAuth, A as Avatar } from "./router-rHJT1VjN.mjs";
+import { P as ProjectCard } from "./ProjectCard-Chmvl7wx.mjs";
+import { B as BuildLogCard } from "./BuildLogCard-ql28dvRe.mjs";
+import { C as CollabCard } from "./CollabCard-BvlJJ-en.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { m as Sparkles, F as Flame, n as Users, X, I as Image, Z as Zap, j as Send } from "../_libs/lucide-react.mjs";
+import { l as Rocket, p as Sparkles, F as Flame, q as Users, X, L as Link2, I as Image, Z as Zap, m as Send } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
 import "../_libs/cookie-es.mjs";
@@ -37,17 +37,29 @@ function Composer({ onPosted }) {
   const { user, profile } = useAuth();
   const [body, setBody] = reactExports.useState("");
   const [file, setFile] = reactExports.useState(null);
+  const [projectId, setProjectId] = reactExports.useState("");
+  const [projects, setProjects] = reactExports.useState([]);
   const [submitting, setSubmitting] = reactExports.useState(false);
+  reactExports.useEffect(() => {
+    if (!user) return;
+    supabase.from("projects").select("id, title").eq("owner_id", user.id).order("updated_at", { ascending: false }).limit(50).then(({ data }) => setProjects(data ?? []));
+  }, [user?.id]);
   const submit = async () => {
     if (!user || !body.trim()) return;
     setSubmitting(true);
     try {
       let image_url = null;
       if (file) image_url = await uploadMedia(file, user.id, "logs");
-      const { error } = await supabase.from("build_logs").insert({ user_id: user.id, body: body.trim(), image_url });
+      const { error } = await supabase.from("build_logs").insert({
+        user_id: user.id,
+        project_id: projectId || null,
+        body: body.trim(),
+        image_url
+      });
       if (error) throw error;
       setBody("");
       setFile(null);
+      setProjectId("");
       toast.success("Build log shipped");
       onPosted?.();
     } catch (e) {
@@ -60,12 +72,22 @@ function Composer({ onPosted }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "brutal-card-flat p-4 flex gap-3", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { profile, size: 36 }),
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex-1", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-2 rounded-none border-2 border-white/10 bg-black/20 p-2", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("label", { className: "mb-1 block text-[10px] font-mono uppercase tracking-wider text-muted-foreground", children: "Link this log to a project (optional)" }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Link2, { className: "pointer-events-none absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsxs("select", { value: projectId, onChange: (e) => setProjectId(e.target.value), className: "brutal-input pl-8 text-sm", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: "", children: "Standalone log (not linked)" }),
+            projects.map((p) => /* @__PURE__ */ jsxRuntimeExports.jsx("option", { value: p.id, children: p.title }, p.id))
+          ] })
+        ] })
+      ] }),
       /* @__PURE__ */ jsxRuntimeExports.jsx(
         "textarea",
         {
           value: body,
           onChange: (e) => setBody(e.target.value),
-          placeholder: "What are you building right now?",
+          placeholder: projectId ? "Share progress on this project..." : "What are you building right now?",
           className: "brutal-input min-h-[70px] resize-y",
           maxLength: 1e3
         }
@@ -252,7 +274,20 @@ function FeedPage() {
         ] })
       ] })
     ] }),
-    user && /* @__PURE__ */ jsxRuntimeExports.jsx(Composer, { onPosted: load }),
+    user && /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "mb-4 space-y-3", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat border-primary/40 bg-[color:color-mix(in_oklab,var(--primary)_7%,var(--card))] p-4", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground", children: "Post options" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "font-display text-xl font-black leading-tight", children: "Quick build update or full project launch?" }),
+          /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "mt-1 text-sm text-muted-foreground", children: "Use log for small progress. Use project launch for something people can save, like, and explore." })
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/new", className: "brutal-btn justify-center sm:shrink-0", children: [
+          /* @__PURE__ */ jsxRuntimeExports.jsx(Rocket, { className: "h-4 w-4" }),
+          " Ship full project"
+        ] })
+      ] }) }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Composer, { onPosted: load })
+    ] }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex gap-1 mt-6 mb-4 border-b-2 border-white/10 overflow-x-auto", children: [{
       id: "all",
       label: "All",

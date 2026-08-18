@@ -1,13 +1,13 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { a as Route$4, u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
+import { a as Route$4, u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
 import { R as Root2, T as Trigger, P as Portal, C as Content2 } from "../_libs/radix-ui__react-popover.mjs";
 import { c as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
-import { g as MessageSquare, A as ArrowLeft, R as Reply, l as SmilePlus, P as Paperclip, X, j as Send } from "../_libs/lucide-react.mjs";
+import { i as MessageSquare, A as ArrowLeft, R as Reply, o as SmilePlus, P as Paperclip, X, m as Send } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
@@ -228,12 +228,12 @@ function ChatPage() {
     setReplyTo(null);
     if (activeChat?.otherUser) {
       const preview = media_type === "image" ? "sent a photo" : media_type === "video" ? "sent a video" : content.trim().slice(0, 50) + (content.trim().length > 50 ? "..." : "");
-      await supabase.from("notifications").insert({
-        user_id: activeChat.otherUser.id,
-        actor_id: user.id,
+      await createNotification({
+        userId: activeChat.otherUser.id,
+        actorId: user.id,
         type: "chat_message",
-        entity_id: activeChatId,
-        entity_type: "chat",
+        entityId: activeChatId,
+        entityType: "chat",
         body: preview || "sent you a message"
       });
     }

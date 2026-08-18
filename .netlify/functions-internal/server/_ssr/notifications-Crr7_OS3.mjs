@@ -1,9 +1,9 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { d as useNavigate, L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
+import { u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { B as Bell, g as MessageSquare, C as Check, n as Users, U as UserPlus, f as MessageCircle, d as Heart, X } from "../_libs/lucide-react.mjs";
+import { B as Bell, i as MessageSquare, C as Check, q as Users, U as UserPlus, h as MessageCircle, e as Heart, X } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
@@ -51,7 +51,13 @@ function NotificationsPage() {
     } = await supabase.from("notifications").select("*, actor:profiles!notifications_actor_id_fkey(id, username, display_name, avatar_url)").eq("user_id", user.id).order("created_at", {
       ascending: false
     }).limit(100);
-    setNotifs(data ?? []);
+    const sorted = [...data ?? []].sort((a, b) => {
+      const aPriority = a.type === "collab_request" ? 0 : 1;
+      const bPriority = b.type === "collab_request" ? 0 : 1;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return +new Date(b.created_at) - +new Date(a.created_at);
+    });
+    setNotifs(sorted);
     const collabNotifs = data?.filter((n) => n.type === "collab_request") || [];
     let reqMap = {};
     const collabReqIdNotifs = collabNotifs.filter((n) => n.entity_type === "collab_request");
@@ -94,6 +100,14 @@ function NotificationsPage() {
         request_id: requestId
       });
       if (error) return toast.error(error.message);
+      await createNotification({
+        userId: request.sender_id,
+        actorId: user?.id ?? null,
+        type: "collab_accepted",
+        entityId: requestId,
+        entityType: "collab_request",
+        body: `Your collab request was accepted`
+      });
       toast.success("Request accepted! Chat started.");
       navigate({
         to: "/chat",
@@ -108,6 +122,14 @@ function NotificationsPage() {
         status
       }).eq("id", requestId);
       if (error) return toast.error(error.message);
+      await createNotification({
+        userId: request.sender_id,
+        actorId: user?.id ?? null,
+        type: "collab_accepted",
+        entityId: requestId,
+        entityType: "collab_request",
+        body: `Your collab request was declined`
+      });
       toast.success("Request declined");
     }
     load();
@@ -140,9 +162,11 @@ function NotificationsPage() {
       const Icon = ICONS[n.type] ?? Bell;
       const request = n.type === "collab_request" ? requests[n.entity_id] : null;
       const isPending = request?.status === "pending";
+      const isCollabRequest = n.type === "collab_request";
       const link = n.type === "chat_message" ? `/chat?id=${n.entity_id}` : n.entity_type === "project" ? `/p/${n.entity_id}` : n.entity_type === "profile" ? `/u/${n.actor?.username}` : n.type === "collab_request" ? `/collab` : "/collab";
-      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "brutal-card-flat p-4 flex items-center gap-4 hover:border-white transition-colors bg-card/50 group relative overflow-hidden", children: [
-        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute top-0 right-0 w-32 h-32 bg-primary/5 -rotate-45 translate-x-16 -translate-y-16 pointer-events-none" }),
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: `brutal-card-flat p-4 flex items-center gap-4 hover:border-white transition-colors group relative overflow-hidden ${isCollabRequest ? "border-[var(--tangerine)] bg-[color:color-mix(in_oklab,var(--tangerine)_12%,var(--card))]" : "bg-card/50"}`, children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: `absolute top-0 right-0 w-32 h-32 -rotate-45 translate-x-16 -translate-y-16 pointer-events-none ${isCollabRequest ? "bg-[var(--tangerine)]/20" : "bg-primary/5"}` }),
+        isCollabRequest && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "absolute right-2 top-2 border border-[var(--tangerine)] bg-black/70 px-2 py-0.5 text-[9px] font-mono font-black uppercase tracking-wider text-[var(--tangerine)]", children: "Collab request" }),
         /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: link, className: "contents", children: [
           /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(Avatar, { profile: n.actor, size: 44 }),

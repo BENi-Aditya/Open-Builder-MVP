@@ -7,7 +7,7 @@ import { BuildLogCard, type BuildLog } from "@/components/BuildLogCard";
 import { CollabCard, type CollabPost } from "@/components/CollabCard";
 import { Composer } from "@/components/Composer";
 import { toast } from "sonner";
-import { Flame, Sparkles, Users, X } from "lucide-react";
+import { Flame, Sparkles, Users, X, Rocket } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: FeedPage });
 
@@ -148,7 +148,23 @@ function FeedPage() {
         </div>
       </header>
 
-      {user && <Composer onPosted={load} />}
+      {user && (
+        <section className="mb-4 space-y-3">
+          <div className="brutal-card-flat border-primary/40 bg-[color:color-mix(in_oklab,var(--primary)_7%,var(--card))] p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">Post options</p>
+                <h2 className="font-display text-xl font-black leading-tight">Quick build update or full project launch?</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Use log for small progress. Use project launch for something people can save, like, and explore.</p>
+              </div>
+              <Link to="/new" className="brutal-btn justify-center sm:shrink-0">
+                <Rocket className="h-4 w-4" /> Ship full project
+              </Link>
+            </div>
+          </div>
+          <Composer onPosted={load} />
+        </section>
+      )}
 
       <div className="flex gap-1 mt-6 mb-4 border-b-2 border-white/10 overflow-x-auto">
         {[

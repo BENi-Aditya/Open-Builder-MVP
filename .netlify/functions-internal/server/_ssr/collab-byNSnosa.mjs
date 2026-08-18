@@ -1,10 +1,10 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth } from "./router-BZVH0095.mjs";
-import { C as CollabCard } from "./CollabCard-CoI4d1IZ.mjs";
+import { u as useAuth, d as createNotification } from "./router-rHJT1VjN.mjs";
+import { C as CollabCard } from "./CollabCard-BvlJJ-en.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { i as Plus, X } from "../_libs/lucide-react.mjs";
+import { k as Plus, X } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
 import "../_libs/cookie-es.mjs";
@@ -108,6 +108,15 @@ function CollabPage() {
       setMsg("");
       return;
     }
+    const postOwnerId = applyTo.user.id;
+    await createNotification({
+      userId: postOwnerId,
+      actorId: user.id,
+      type: "collab_request",
+      entityId: request?.id ?? applyTo.id,
+      entityType: "collab_request",
+      body: `${user.user_metadata?.username || "Someone"} wants to collab on ${applyTo.title}`
+    });
     toast.success("Request sent");
     setMyRequests((prev) => [...prev, applyTo.id]);
     setApplyTo(null);

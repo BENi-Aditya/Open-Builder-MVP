@@ -28,7 +28,13 @@ function NotificationsPage() {
   const load = async () => {
     if (!user) return;
     const { data } = await supabase.from("notifications").select("*, actor:profiles!notifications_actor_id_fkey(id, username, display_name, avatar_url)").eq("user_id", user.id).order("created_at", { ascending: false }).limit(100);
-    setNotifs(data ?? []);
+    const sorted = [...(data ?? [])].sort((a, b) => {
+      const aPriority = a.type === "collab_request" ? 0 : 1;
+      const bPriority = b.type === "collab_request" ? 0 : 1;
+      if (aPriority !== bPriority) return aPriority - bPriority;
+      return +new Date(b.created_at) - +new Date(a.created_at);
+    });
+    setNotifs(sorted);
     
     // Load request statuses for collab_requests
     const collabNotifs = data?.filter(n => n.type === "collab_request") || [];
@@ -126,13 +132,26 @@ function NotificationsPage() {
             const Icon = ICONS[n.type] ?? Bell;
             const request = n.type === "collab_request" ? requests[n.entity_id!] : null;
             const isPending = request?.status === 'pending';
+            const isCollabRequest = n.type === "collab_request";
 
             const link = n.type === "chat_message" ? `/chat?id=${n.entity_id}` : n.entity_type === "project" ? `/p/${n.entity_id}` : n.entity_type === "profile" ? `/u/${n.actor?.username}` : n.type === "collab_request" ? `/collab` : "/collab";
             
             return (
-              <div key={n.id} className="brutal-card-flat p-4 flex items-center gap-4 hover:border-white transition-colors bg-card/50 group relative overflow-hidden">
+              <div
+                key={n.id}
+                className={`brutal-card-flat p-4 flex items-center gap-4 hover:border-white transition-colors group relative overflow-hidden ${
+                  isCollabRequest
+                    ? "border-[var(--tangerine)] bg-[color:color-mix(in_oklab,var(--tangerine)_12%,var(--card))]"
+                    : "bg-card/50"
+                }`}
+              >
                 {/* Background Accent */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -rotate-45 translate-x-16 -translate-y-16 pointer-events-none" />
+                <div className={`absolute top-0 right-0 w-32 h-32 -rotate-45 translate-x-16 -translate-y-16 pointer-events-none ${isCollabRequest ? "bg-[var(--tangerine)]/20" : "bg-primary/5"}`} />
+                {isCollabRequest && (
+                  <div className="absolute right-2 top-2 border border-[var(--tangerine)] bg-black/70 px-2 py-0.5 text-[9px] font-mono font-black uppercase tracking-wider text-[var(--tangerine)]">
+                    Collab request
+                  </div>
+                )}
                 
                 <Link to={link} className="contents">
                   <div className="relative">

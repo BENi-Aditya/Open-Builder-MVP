@@ -67,8 +67,8 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body { background: var(--color-background); color: var(--color-foreground); font-family: "Inter", system-ui, sans-serif; }
-  body { cursor: none; }
+  html, body { background: var(--color-background); color: var(--color-foreground); font-family: "Inter", system-ui, sans-serif; overflow-x: hidden; }
+  body { min-height: 100dvh; }
   h1, h2, h3, h4 { font-family: var(--font-display); letter-spacing: -0.02em; font-weight: 700; }
   code, pre, kbd { font-family: var(--font-mono); }
   ::selection { background: var(--primary); color: var(--primary-foreground); }
@@ -95,7 +95,7 @@
     display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
     padding: .65rem 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: .05em;
     font-size: .8rem; border: 2px solid #fff; background: var(--primary); color: var(--primary-foreground);
-    box-shadow: 4px 4px 0 0 #fff; transition: all 120ms ease; cursor: none;
+    box-shadow: 4px 4px 0 0 #fff; transition: all 120ms ease;
   }
   .brutal-btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 0 var(--primary); }
   .brutal-btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 #fff; }
@@ -149,4 +149,52 @@
 .pop-in { animation: pop .25s ease-out; }
 
 /* hide native cursor on interactive elements (we use pixel cursor) */
-a, button, input, textarea, select, [role="button"] { cursor: none; }
+@media (hover: hover) and (pointer: fine) {
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"] {
+    cursor: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .brutal-card:hover {
+    transform: none;
+    box-shadow: 6px 6px 0 0 oklch(1 0 0 / 0.95);
+  }
+
+  .brutal-btn:hover {
+    transform: none;
+    box-shadow: 4px 4px 0 0 #fff;
+  }
+
+  .brutal-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 0 #fff;
+  }
+
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 767px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  .feed-shell {
+    padding: 0.75rem 0.75rem calc(6.25rem + env(safe-area-inset-bottom));
+  }
+}

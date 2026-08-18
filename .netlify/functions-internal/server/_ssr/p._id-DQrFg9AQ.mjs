@@ -1,10 +1,10 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { c as Route, u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
+import { c as Route, u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
-import { d as Heart, b as Bookmark, E as ExternalLink, G as Github, Z as Zap, f as MessageCircle, j as Send, T as Trash2 } from "../_libs/lucide-react.mjs";
+import { e as Heart, b as Bookmark, E as ExternalLink, Y as Youtube, G as Github, Z as Zap, h as MessageCircle, m as Send, T as Trash2 } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
@@ -103,6 +103,14 @@ function ProjectPage() {
         ...p,
         like_count: p.like_count + 1
       }));
+      await createNotification({
+        userId: project.owner_id,
+        actorId: user.id,
+        type: "like",
+        entityId: id,
+        entityType: "project",
+        body: `${user.user_metadata?.username || "Someone"} liked your project`
+      });
     }
   };
   const toggleSave = async () => {
@@ -150,6 +158,14 @@ function ProjectPage() {
       body: comment.trim()
     });
     if (error) return toast.error(error.message);
+    await createNotification({
+      userId: project.owner_id,
+      actorId: user.id,
+      type: "comment",
+      entityId: id,
+      entityType: "project",
+      body: `${user.user_metadata?.username || "Someone"} commented on your project`
+    });
     setComment("");
     load();
   };
@@ -216,6 +232,10 @@ function ProjectPage() {
             /* @__PURE__ */ jsxRuntimeExports.jsx(ExternalLink, { className: "w-4 h-4" }),
             " Live"
           ] }),
+          project.youtube_url && /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href: project.youtube_url, target: "_blank", rel: "noreferrer", className: "brutal-btn brutal-btn-ghost text-xs", children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(Youtube, { className: "w-4 h-4" }),
+            " Video"
+          ] }),
           project.github_url && /* @__PURE__ */ jsxRuntimeExports.jsxs("a", { href: project.github_url, target: "_blank", rel: "noreferrer", className: "brutal-btn brutal-btn-ghost text-xs", children: [
             /* @__PURE__ */ jsxRuntimeExports.jsx(Github, { className: "w-4 h-4" }),
             " Code"
@@ -248,7 +268,7 @@ function ProjectPage() {
                 addSuffix: true
               }) }),
               /* @__PURE__ */ jsxRuntimeExports.jsx("p", { className: "text-sm whitespace-pre-wrap mt-1", children: l.body }),
-              l.image_url && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: l.image_url, alt: "", className: "mt-2 border-2 border-white/20 max-h-72" })
+              l.image_url && /* @__PURE__ */ jsxRuntimeExports.jsx("img", { src: l.image_url, alt: "", className: "mt-2 w-full max-w-full border-2 border-white/20 object-cover max-h-72" })
             ] }, l.id)) })
           ] }),
           /* @__PURE__ */ jsxRuntimeExports.jsxs("section", { className: "brutal-card-flat p-6", children: [

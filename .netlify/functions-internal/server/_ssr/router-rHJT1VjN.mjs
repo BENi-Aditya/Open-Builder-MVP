@@ -4,7 +4,7 @@ import { b as createRouter, a as createRootRouteWithContext, e as useRouter, L a
 import { j as jsxRuntimeExports, r as reactExports } from "../_libs/react.mjs";
 import { T as Toaster } from "../_libs/sonner.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { S as Search, e as House, c as Compass, n as Users, B as Bell, g as MessageSquare, b as Bookmark, i as Plus, k as Settings, L as LogOut, H as Hammer } from "../_libs/lucide-react.mjs";
+import { S as Search, f as House, c as Compass, q as Users, B as Bell, i as MessageSquare, b as Bookmark, k as Plus, n as Settings, g as LogOut, H as Hammer } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
 import "../_libs/cookie-es.mjs";
@@ -27,7 +27,7 @@ import "../_libs/iceberg-js.mjs";
 import "../_libs/supabase__auth-js.mjs";
 import "tslib";
 import "../_libs/supabase__functions-js.mjs";
-const appCss = "/assets/styles-D1lcL2Ms.css";
+const appCss = "/assets/styles-DeCM_d26.css";
 const Ctx = reactExports.createContext({
   user: null,
   session: null,
@@ -82,6 +82,49 @@ function AuthProvider({ children }) {
   );
 }
 const useAuth = () => reactExports.useContext(Ctx);
+async function requestBrowserPermission() {
+  if (!("Notification" in window)) return "unsupported";
+  if (Notification.permission === "granted" || Notification.permission === "denied") {
+    return Notification.permission;
+  }
+  return Notification.requestPermission();
+}
+async function createNotification({
+  userId,
+  actorId,
+  type,
+  entityId,
+  entityType,
+  body,
+  title
+}) {
+  if (!userId || userId === actorId) return null;
+  const payload = {
+    user_id: userId,
+    actor_id: actorId ?? null,
+    type,
+    entity_id: entityId ?? null,
+    entity_type: entityType ?? null,
+    body: body ?? null,
+    read: false
+  };
+  const { data, error } = await supabase.from("notifications").insert(payload).select().single();
+  if (error) {
+    console.warn("Notification insert failed:", error.message);
+    return null;
+  }
+  if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+    const shouldSkipBrowserAlert = document.visibilityState === "visible";
+    if (!shouldSkipBrowserAlert) {
+      new Notification(title ?? "New activity", {
+        body: body || "You have a new notification",
+        icon: "/logo.webp",
+        tag: `${type}:${entityId ?? userId}`
+      });
+    }
+  }
+  return data;
+}
 const NAV = [
   { to: "/", label: "Feed", icon: House },
   { to: "/explore", label: "Explore", icon: Compass },
@@ -98,6 +141,17 @@ function AppShell({ children }) {
   const [q, setQ] = reactExports.useState("");
   reactExports.useEffect(() => {
     if (!user) return;
+    const promptNotifications = async () => {
+      if (typeof window === "undefined") return;
+      const hasPrompted = window.localStorage.getItem("openbuilder-notify-prompted") === "1";
+      if (hasPrompted) return;
+      window.localStorage.setItem("openbuilder-notify-prompted", "1");
+      try {
+        await requestBrowserPermission();
+      } catch {
+      }
+    };
+    promptNotifications();
     const load = async () => {
       const { count } = await supabase.from("notifications").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
       setUnread(count ?? 0);
@@ -108,7 +162,7 @@ function AppShell({ children }) {
       ch.unsubscribe();
     };
   }, [user]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-screen grid grid-bg", style: { gridTemplateColumns: "minmax(0, 260px) 1fr" }, children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid min-h-dvh grid-cols-1 grid-bg md:[grid-template-columns:minmax(0,260px)_1fr]", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "hidden md:flex flex-col gap-4 border-r-2 border-white/10 p-5 sticky top-0 h-screen overflow-y-auto", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/", className: "flex items-center gap-2 mb-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
@@ -186,11 +240,22 @@ function AppShell({ children }) {
         " Join the builders"
       ] }) })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "min-w-0", children }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "md:hidden fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 bg-card border-t-2 border-white", children: NAV.map((n) => /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: n.to, className: "flex flex-col items-center py-2 text-[10px] font-bold uppercase", children: [
-      /* @__PURE__ */ jsxRuntimeExports.jsx(n.icon, { className: "w-5 h-5 mb-0.5" }),
-      n.label
-    ] }, n.to)) })
+    /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-0", children }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden", children: NAV.map((n) => {
+      const active = loc.pathname === n.to || n.to !== "/" && loc.pathname.startsWith(n.to);
+      return /* @__PURE__ */ jsxRuntimeExports.jsxs(
+        Link,
+        {
+          to: n.to,
+          className: `flex min-h-14 flex-col items-center justify-center rounded-none border px-1 py-1 text-[9px] font-bold uppercase tracking-tight ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent text-muted-foreground"}`,
+          children: [
+            /* @__PURE__ */ jsxRuntimeExports.jsx(n.icon, { className: "mb-0.5 h-4 w-4" }),
+            n.label
+          ]
+        },
+        n.to
+      );
+    }) })
   ] });
 }
 function Avatar({ profile, size = 32 }) {
@@ -214,7 +279,14 @@ function Avatar({ profile, size = 32 }) {
 function PixelCursor() {
   const cursorRef = reactExports.useRef(null);
   const burstRef = reactExports.useRef(null);
+  const [enabled, setEnabled] = reactExports.useState(false);
   reactExports.useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    setEnabled(!isTouch);
+  }, []);
+  reactExports.useEffect(() => {
+    if (!enabled) return;
     const cursor = cursorRef.current;
     const burst = burstRef.current;
     if (!cursor || !burst) return;
@@ -249,7 +321,8 @@ function PixelCursor() {
       window.removeEventListener("mousedown", click);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [enabled]);
+  if (!enabled) return null;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("style", { children: `
         .pix-cursor { position: fixed; left: 0; top: 0; width: 20px; height: 20px; pointer-events: none; z-index: 9999; will-change: transform; image-rendering: pixelated; mix-blend-mode: normal; }
@@ -360,57 +433,57 @@ function RootComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(AppShell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) })
   ] }) });
 }
-const $$splitComponentImporter$b = () => import("./settings-V_Rn9BNA.mjs");
+const $$splitComponentImporter$b = () => import("./settings-ZwY0exfB.mjs");
 const Route$b = createFileRoute("/settings")({
   component: lazyRouteComponent($$splitComponentImporter$b, "component")
 });
-const $$splitComponentImporter$a = () => import("./seed-CXxYJjaY.mjs");
+const $$splitComponentImporter$a = () => import("./seed-j-rm54Ib.mjs");
 const Route$a = createFileRoute("/seed")({
   component: lazyRouteComponent($$splitComponentImporter$a, "component")
 });
-const $$splitComponentImporter$9 = () => import("./saved-BCobkmyq.mjs");
+const $$splitComponentImporter$9 = () => import("./saved-x9Ul5lrD.mjs");
 const Route$9 = createFileRoute("/saved")({
   component: lazyRouteComponent($$splitComponentImporter$9, "component")
 });
-const $$splitComponentImporter$8 = () => import("./notifications-2TP0Puc7.mjs");
+const $$splitComponentImporter$8 = () => import("./notifications-Crr7_OS3.mjs");
 const Route$8 = createFileRoute("/notifications")({
   component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-const $$splitComponentImporter$7 = () => import("./new-Bv3z1O6q.mjs");
+const $$splitComponentImporter$7 = () => import("./new-C1g5K2uY.mjs");
 const Route$7 = createFileRoute("/new")({
   component: lazyRouteComponent($$splitComponentImporter$7, "component")
 });
-const $$splitComponentImporter$6 = () => import("./explore-BJ6NeMXF.mjs");
+const $$splitComponentImporter$6 = () => import("./explore-BF54_Unx.mjs");
 const Route$6 = createFileRoute("/explore")({
   component: lazyRouteComponent($$splitComponentImporter$6, "component"),
   validateSearch: (s) => ({
     q: s.q || ""
   })
 });
-const $$splitComponentImporter$5 = () => import("./collab-BL8-0QJU.mjs");
+const $$splitComponentImporter$5 = () => import("./collab-byNSnosa.mjs");
 const Route$5 = createFileRoute("/collab")({
   component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
-const $$splitComponentImporter$4 = () => import("./chat-C0DH5tuu.mjs");
+const $$splitComponentImporter$4 = () => import("./chat-DDMDT420.mjs");
 const Route$4 = createFileRoute("/chat")({
   component: lazyRouteComponent($$splitComponentImporter$4, "component"),
   validateSearch: (s) => ({
     id: s.id || void 0
   })
 });
-const $$splitComponentImporter$3 = () => import("./auth-B3vg6U0i.mjs");
+const $$splitComponentImporter$3 = () => import("./auth-CAhnruiN.mjs");
 const Route$3 = createFileRoute("/auth")({
   component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-const $$splitComponentImporter$2 = () => import("./index-A2obLTDS.mjs");
+const $$splitComponentImporter$2 = () => import("./index-DuGmHJuA.mjs");
 const Route$2 = createFileRoute("/")({
   component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-const $$splitComponentImporter$1 = () => import("./u._username--JkpQzHJ.mjs");
+const $$splitComponentImporter$1 = () => import("./u._username-rxzgJdQk.mjs");
 const Route$1 = createFileRoute("/u/$username")({
   component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-const $$splitComponentImporter = () => import("./p._id-4KDAPdQx.mjs");
+const $$splitComponentImporter = () => import("./p._id-DQrFg9AQ.mjs");
 const Route = createFileRoute("/p/$id")({
   component: lazyRouteComponent($$splitComponentImporter, "component")
 });
@@ -509,6 +582,7 @@ export {
   Route$4 as a,
   Route$1 as b,
   Route as c,
+  createNotification as d,
   router as r,
   useAuth as u
 };

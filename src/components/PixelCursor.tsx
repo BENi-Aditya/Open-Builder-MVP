@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Pixel-art cursor system. Renders a 16x16 yellow arrow that follows the mouse,
@@ -7,8 +7,16 @@ import { useEffect, useRef } from "react";
 export function PixelCursor() {
   const cursorRef = useRef<HTMLDivElement>(null);
   const burstRef = useRef<HTMLDivElement>(null);
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isTouch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    setEnabled(!isTouch);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
     const cursor = cursorRef.current;
     const burst = burstRef.current;
     if (!cursor || !burst) return;
@@ -45,7 +53,9 @@ export function PixelCursor() {
       window.removeEventListener("mousedown", click);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
     <>

@@ -182,11 +182,11 @@ function ChatPage() {
           : content.trim().slice(0, 50) + (content.trim().length > 50 ? "..." : "");
 
       await createNotification({
-        user_id: activeChat.otherUser.id,
-        actor_id: user.id,
+        userId: activeChat.otherUser.id,
+        actorId: user.id,
         type: "chat_message",
-        entity_id: activeChatId,
-        entity_type: "chat",
+        entityId: activeChatId,
+        entityType: "chat",
         body: preview || "sent you a message",
       });
     }

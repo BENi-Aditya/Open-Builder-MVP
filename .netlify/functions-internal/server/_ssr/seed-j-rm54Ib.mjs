@@ -1,6 +1,6 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth } from "./router-BZVH0095.mjs";
+import { u as useAuth } from "./router-rHJT1VjN.mjs";
 import "../_libs/sonner.mjs";
 import "../_libs/supabase__supabase-js.mjs";
 import "../_libs/supabase__postgrest-js.mjs";

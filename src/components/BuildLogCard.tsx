@@ -38,7 +38,7 @@ export function BuildLogCard({ log }: { log: BuildLog }) {
         </div>
         <p className="mt-2 text-sm whitespace-pre-wrap">{log.body}</p>
         {log.image_url && (
-          <img src={log.image_url} alt="" className="mt-3 border-2 border-white/20 max-h-96 object-cover" />
+          <img src={log.image_url} alt="" className="mt-3 w-full max-w-full border-2 border-white/20 object-cover max-h-96" />
         )}
       </div>
     </article>

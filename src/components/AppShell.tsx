@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [user]);
 
   return (
-    <div className="min-h-screen grid grid-bg" style={{ gridTemplateColumns: "minmax(0, 260px) 1fr" }}>
+    <div className="grid min-h-dvh grid-cols-1 grid-bg md:[grid-template-columns:minmax(0,260px)_1fr]">
       {/* Sidebar */}
       <aside className="hidden md:flex flex-col gap-4 border-r-2 border-white/10 p-5 sticky top-0 h-screen overflow-y-auto">
         <Link to="/" className="flex items-center gap-2 mb-2">
@@ -130,16 +130,23 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="min-w-0">{children}</main>
+      <main className="min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
 
       {/* mobile bottom bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 grid grid-cols-5 bg-card border-t-2 border-white">
-        {NAV.map((n) => (
-          <Link key={n.to} to={n.to} className="flex flex-col items-center py-2 text-[10px] font-bold uppercase">
-            <n.icon className="w-5 h-5 mb-0.5" />
-            {n.label}
-          </Link>
-        ))}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
+        {NAV.map((n) => {
+          const active = loc.pathname === n.to || (n.to !== "/" && loc.pathname.startsWith(n.to));
+          return (
+            <Link
+              key={n.to}
+              to={n.to}
+              className={`flex min-h-14 flex-col items-center justify-center rounded-none border px-1 py-1 text-[9px] font-bold uppercase tracking-tight ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent text-muted-foreground"}`}
+            >
+              <n.icon className="mb-0.5 h-4 w-4" />
+              {n.label}
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );
