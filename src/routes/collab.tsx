@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { CollabCard, type CollabPost } from "@/components/CollabCard";
 import { toast } from "sonner";
 import { Plus, X } from "lucide-react";
+import { createNotification } from "@/lib/notifications";
 
 export const Route = createFileRoute("/collab")({ component: CollabPage });
 
@@ -71,6 +72,17 @@ function CollabPage() {
       setApplyTo(null); setMsg("");
       return;
     }
+
+    const postOwnerId = applyTo.user.id;
+
+    await createNotification({
+      userId: postOwnerId,
+      actorId: user.id,
+      type: "collab_request",
+      entityId: request?.id ?? applyTo.id,
+      entityType: "collab_request",
+      body: `${user.user_metadata?.username || "Someone"} wants to collab on ${applyTo.title}`,
+    });
 
     toast.success("Request sent");
     setMyRequests(prev => [...prev, applyTo.id]);

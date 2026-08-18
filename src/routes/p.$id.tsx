@@ -7,6 +7,7 @@ import { Heart, MessageCircle, Bookmark, Github, ExternalLink, Trash2, Send, Zap
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { uploadMedia } from "@/lib/upload";
+import { createNotification } from "@/lib/notifications";
 
 export const Route = createFileRoute("/p/$id")({ component: ProjectPage });
 
@@ -53,7 +54,18 @@ function ProjectPage() {
   const toggleLike = async () => {
     if (!user) return toast.error("Sign in first");
     if (liked) { await supabase.from("likes").delete().eq("user_id", user.id).eq("project_id", id); setLiked(false); setProject((p: any) => ({ ...p, like_count: Math.max(0, p.like_count - 1) })); }
-    else { await supabase.from("likes").insert({ user_id: user.id, project_id: id }); setLiked(true); setProject((p: any) => ({ ...p, like_count: p.like_count + 1 })); }
+    else {
+      await supabase.from("likes").insert({ user_id: user.id, project_id: id });
+      setLiked(true); setProject((p: any) => ({ ...p, like_count: p.like_count + 1 }));
+      await createNotification({
+        userId: project.owner_id,
+        actorId: user.id,
+        type: "like",
+        entityId: id,
+        entityType: "project",
+        body: `${user.user_metadata?.username || "Someone"} liked your project`,
+      });
+    }
   };
   const toggleSave = async () => {
     if (!user) return toast.error("Sign in first");
@@ -77,6 +89,14 @@ function ProjectPage() {
     if (!user || !comment.trim()) return;
     const { error } = await supabase.from("comments").insert({ project_id: id, user_id: user.id, body: comment.trim() });
     if (error) return toast.error(error.message);
+    await createNotification({
+      userId: project.owner_id,
+      actorId: user.id,
+      type: "comment",
+      entityId: id,
+      entityType: "project",
+      body: `${user.user_metadata?.username || "Someone"} commented on your project`,
+    });
     setComment(""); load();
   };
   const addLog = async () => {

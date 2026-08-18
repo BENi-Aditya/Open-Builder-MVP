@@ -6,7 +6,8 @@ import { ProjectCard, type FeedProject } from "@/components/ProjectCard";
 import { BuildLogCard, type BuildLog } from "@/components/BuildLogCard";
 import { CollabCard, type CollabPost } from "@/components/CollabCard";
 import { Composer } from "@/components/Composer";
-import { Flame, Sparkles, Users } from "lucide-react";
+import { toast } from "sonner";
+import { Flame, Sparkles, Users, X } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: FeedPage });
 
@@ -21,6 +22,9 @@ function FeedPage() {
   const [tab, setTab] = useState<"all" | "following" | "trending">("all");
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ builders: 0, projects: 0 });
+  const [myCollabRequests, setMyCollabRequests] = useState<string[]>([]);
+  const [applyTo, setApplyTo] = useState<CollabPost | null>(null);
+  const [applyMessage, setApplyMessage] = useState("");
 
   const load = async () => {
     setLoading(true);
@@ -50,8 +54,37 @@ function FeedPage() {
 
     const [p, l, c] = await Promise.all([projQ, logQ, collabQ]);
 
+    const projectIds = ((p.data ?? []) as FeedProject[]).map((d) => d.id);
+    let recentCommentsByProject: Record<string, any[]> = {};
+
+    if (projectIds.length > 0) {
+      const { data: commentsData } = await supabase
+        .from("comments")
+        .select("id, body, created_at, project_id, user:profiles!comments_user_id_fkey(id, username, display_name, avatar_url)")
+        .in("project_id", projectIds)
+        .order("created_at", { ascending: false });
+
+      for (const comment of commentsData ?? []) {
+        const key = comment.project_id;
+        if (!recentCommentsByProject[key]) recentCommentsByProject[key] = [];
+        if (recentCommentsByProject[key].length < 2) recentCommentsByProject[key].push(comment);
+      }
+    }
+
+    const projects = ((p.data ?? []) as FeedProject[]).map((d) => ({
+      ...d,
+      recent_comments: recentCommentsByProject[d.id] ?? [],
+    }));
+
+    if (user) {
+      const { data: reqs } = await supabase.from("collab_requests").select("post_id").eq("sender_id", user.id);
+      setMyCollabRequests((reqs ?? []).map((r) => r.post_id));
+    } else {
+      setMyCollabRequests([]);
+    }
+
     const merged: FeedItem[] = [
-      ...((p.data ?? []) as unknown as FeedProject[]).map((d) => ({ kind: "project" as const, created_at: d.created_at, data: d })),
+      ...projects.map((d) => ({ kind: "project" as const, created_at: d.created_at, data: d })),
       ...((l.data ?? []) as unknown as BuildLog[]).map((d) => ({ kind: "log" as const, created_at: d.created_at, data: d })),
       ...((c.data ?? []) as unknown as CollabPost[]).map((d) => ({ kind: "collab" as const, created_at: d.created_at, data: d })),
     ];
@@ -62,9 +95,36 @@ function FeedPage() {
 
   useEffect(() => { load(); }, [tab, user?.id]);
 
+  const applyToCollab = async () => {
+    if (!user || !applyTo) return;
+    if (myCollabRequests.includes(applyTo.id)) {
+      toast.error("You already applied to this collab");
+      setApplyTo(null);
+      setApplyMessage("");
+      return;
+    }
+
+    const { error } = await supabase.from("collab_requests").insert({
+      post_id: applyTo.id,
+      sender_id: user.id,
+      message: applyMessage.trim() || "Hi! I’d love to join this.",
+    });
+
+    if (error) {
+      toast.error(error.message || "Could not send collab request");
+      setApplyTo(null);
+      setApplyMessage("");
+      return;
+    }
+
+    toast.success("Request sent");
+    setMyCollabRequests((prev) => [...prev, applyTo.id]);
+    setApplyTo(null);
+    setApplyMessage("");
+  };
+
   return (
-    <div className="max-w-6xl mx-auto p-4 md:p-8 pb-24">
-      {/* Hero */}
+    <div className="feed-shell">
       <header className="brutal-card-flat p-6 md:p-10 mb-8 relative overflow-hidden scan-noise">
         <div className="grid-bg absolute inset-0 opacity-50" />
         <div className="relative">
@@ -90,35 +150,61 @@ function FeedPage() {
 
       {user && <Composer onPosted={load} />}
 
-      {/* Tabs */}
       <div className="flex gap-1 mt-6 mb-4 border-b-2 border-white/10 overflow-x-auto">
         {[
           { id: "all", label: "All", icon: Sparkles },
           { id: "trending", label: "Trending", icon: Flame },
           { id: "following", label: "Following", icon: Users },
         ].map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id as typeof tab)} className={`flex items-center gap-2 px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
+          <button key={t.id} onClick={() => setTab(t.id as typeof tab)} className={`feed-tab flex items-center gap-2 px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>
             <t.icon className="w-3.5 h-3.5" /> {t.label}
           </button>
         ))}
       </div>
 
-      {/* Masonry-ish feed */}
       {loading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="brutal-card-flat h-64 animate-pulse" />)}</div>
+        <div className="feed-stack">
+          {Array.from({ length: 4 }).map((_, i) => <div key={i} className="brutal-card-flat h-72 animate-pulse" />)}
+        </div>
       ) : items.length === 0 ? (
         <div className="brutal-card-flat p-10 text-center">
           <p className="text-muted-foreground">No activity yet. {tab === "following" && "Follow some builders to see their work here."}</p>
         </div>
       ) : (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-4 [column-fill:balance]">
+        <div className="feed-stack">
           {items.map((it, i) => (
-            <div key={`${it.kind}-${"id" in it.data ? it.data.id : i}`} className="break-inside-avoid mb-4">
-              {it.kind === "project" && <ProjectCard project={it.data} accentSeed={i} size={i % 5 === 0 ? "lg" : "md"} />}
+            <div key={`${it.kind}-${"id" in it.data ? it.data.id : i}`}>
+              {it.kind === "project" && <ProjectCard project={it.data} accentSeed={i} size="md" />}
               {it.kind === "log" && <BuildLogCard log={it.data} />}
-              {it.kind === "collab" && <CollabCard post={it.data} />}
+              {it.kind === "collab" && (
+                <CollabCard
+                  post={it.data}
+                  onApply={user && it.data.user.id !== user.id && !myCollabRequests.includes(it.data.id) ? () => setApplyTo(it.data) : undefined}
+                  isApplied={!!(user && myCollabRequests.includes(it.data.id))}
+                />
+              )}
             </div>
           ))}
+        </div>
+      )}
+
+      {applyTo && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/70 p-4" onClick={() => setApplyTo(null)}>
+          <div className="brutal-card w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="mb-4 flex items-center justify-between gap-3">
+              <h2 className="font-display text-2xl font-bold">Apply to: {applyTo.title}</h2>
+              <button onClick={() => setApplyTo(null)} className="rounded-none border-2 border-white/20 p-2 hover:border-white/40">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <textarea
+              value={applyMessage}
+              onChange={(e) => setApplyMessage(e.target.value)}
+              placeholder="Why are you a good fit?"
+              className="brutal-input min-h-[120px] mb-3"
+            />
+            <button onClick={applyToCollab} className="brutal-btn w-full justify-center">Send request</button>
+          </div>
         </div>
       )}
     </div>

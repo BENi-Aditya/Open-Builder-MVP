@@ -1,8 +1,8 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth } from "./router-vnISQ9uA.mjs";
-import { C as CollabCard } from "./CollabCard-CK2SuUyj.mjs";
+import { u as useAuth } from "./router-BZVH0095.mjs";
+import { C as CollabCard } from "./CollabCard-CoI4d1IZ.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { i as Plus, X } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";

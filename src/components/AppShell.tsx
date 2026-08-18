@@ -6,6 +6,7 @@ import {
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { requestBrowserPermission } from "@/lib/notifications";
 
 const NAV = [
   { to: "/", label: "Feed", icon: Home },
@@ -25,6 +26,23 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!user) return;
+
+    const promptNotifications = async () => {
+      if (typeof window === "undefined") return;
+      const hasPrompted = window.localStorage.getItem("openbuilder-notify-prompted") === "1";
+      if (hasPrompted) return;
+
+      window.localStorage.setItem("openbuilder-notify-prompted", "1");
+
+      try {
+        await requestBrowserPermission();
+      } catch {
+        // Browser may block the permission prompt; ignore silently.
+      }
+    };
+
+    promptNotifications();
+
     const load = async () => {
       const { count } = await supabase
         .from("notifications")

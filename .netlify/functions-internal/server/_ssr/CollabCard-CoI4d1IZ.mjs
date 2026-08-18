@@ -1,9 +1,11 @@
 import { j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
-import { A as Avatar } from "./router-vnISQ9uA.mjs";
+import { u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
 import { n as Users, a as ArrowRight } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";
 function CollabCard({ post, onApply, isApplied }) {
+  const { user } = useAuth();
+  const canApply = post.is_open && !isApplied;
   return /* @__PURE__ */ jsxRuntimeExports.jsxs("article", { className: "brutal-card p-5 flex flex-col gap-3", style: { background: "linear-gradient(135deg, var(--card) 0%, color-mix(in oklab, var(--grape) 10%, var(--card)) 100%)" }, children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-start justify-between gap-2", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex items-center gap-2", children: [
@@ -31,10 +33,10 @@ function CollabCard({ post, onApply, isApplied }) {
           ] })
         ] })
       ] }),
-      post.is_open && onApply && /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: onApply, className: "brutal-btn text-[10px] py-1.5", children: [
+      canApply && (user ? /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: onApply, className: "brutal-btn text-[10px] py-1.5", children: [
         "Apply ",
         /* @__PURE__ */ jsxRuntimeExports.jsx(ArrowRight, { className: "w-3 h-3" })
-      ] })
+      ] }) : /* @__PURE__ */ jsxRuntimeExports.jsx(Link, { to: "/auth", className: "brutal-btn brutal-btn-ghost text-[10px] py-1.5", children: "Log in to apply" }))
     ] })
   ] });
 }

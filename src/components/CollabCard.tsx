@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Avatar } from "@/components/AppShell";
+import { useAuth } from "@/lib/auth-context";
 import { formatDistanceToNow } from "date-fns";
 import { Users, ArrowRight } from "lucide-react";
 
@@ -16,6 +17,9 @@ export type CollabPost = {
 };
 
 export function CollabCard({ post, onApply, isApplied }: { post: CollabPost; onApply?: () => void; isApplied?: boolean }) {
+  const { user } = useAuth();
+  const canApply = post.is_open && !isApplied;
+
   return (
     <article className="brutal-card p-5 flex flex-col gap-3" style={{ background: "linear-gradient(135deg, var(--card) 0%, color-mix(in oklab, var(--grape) 10%, var(--card)) 100%)" }}>
       <div className="flex items-start justify-between gap-2">
@@ -42,10 +46,17 @@ export function CollabCard({ post, onApply, isApplied }: { post: CollabPost; onA
             <div className="text-[10px] font-mono text-muted-foreground">@{post.user.username}</div>
           </div>
         </Link>
-        {post.is_open && onApply && (
-          <button onClick={onApply} className="brutal-btn text-[10px] py-1.5">
-            Apply <ArrowRight className="w-3 h-3" />
-          </button>
+
+        {canApply && (
+          user ? (
+            <button onClick={onApply} className="brutal-btn text-[10px] py-1.5">
+              Apply <ArrowRight className="w-3 h-3" />
+            </button>
+          ) : (
+            <Link to="/auth" className="brutal-btn brutal-btn-ghost text-[10px] py-1.5">
+              Log in to apply
+            </Link>
+          )
         )}
       </div>
     </article>

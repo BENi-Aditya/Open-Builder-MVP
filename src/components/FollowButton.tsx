@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { createNotification } from "@/lib/notifications";
 
 export function FollowButton({ targetId, size = "md" }: { targetId: string; size?: "sm" | "md" }) {
   const { user } = useAuth();
@@ -22,6 +23,15 @@ export function FollowButton({ targetId, size = "md" }: { targetId: string; size
     } else {
       await supabase.from("follows").insert({ follower_id: user.id, following_id: targetId });
       setFollowing(true);
+
+      await createNotification({
+        userId: targetId,
+        actorId: user.id,
+        type: "follow",
+        entityId: user.id,
+        entityType: "profile",
+        body: `${user.user_metadata?.username || "Someone"} started following you`,
+      });
     }
   };
 

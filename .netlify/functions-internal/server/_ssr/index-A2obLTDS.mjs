@@ -1,13 +1,13 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth, A as Avatar } from "./router-vnISQ9uA.mjs";
-import { P as ProjectCard } from "./ProjectCard-CnQ1XTrX.mjs";
-import { B as BuildLogCard } from "./BuildLogCard-CANEexNO.mjs";
-import { C as CollabCard } from "./CollabCard-CK2SuUyj.mjs";
+import { u as useAuth, A as Avatar } from "./router-BZVH0095.mjs";
+import { P as ProjectCard } from "./ProjectCard-CK_fWxqV.mjs";
+import { B as BuildLogCard } from "./BuildLogCard-BXFSGDJM.mjs";
+import { C as CollabCard } from "./CollabCard-CoI4d1IZ.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
-import { m as Sparkles, F as Flame, n as Users, I as Image, Z as Zap, j as Send } from "../_libs/lucide-react.mjs";
+import { m as Sparkles, F as Flame, n as Users, X, I as Image, Z as Zap, j as Send } from "../_libs/lucide-react.mjs";
 import "../_libs/tanstack__router-core.mjs";
 import "../_libs/tanstack__history.mjs";
 import "../_libs/cookie-es.mjs";
@@ -102,6 +102,9 @@ function FeedPage() {
     builders: 0,
     projects: 0
   });
+  const [myCollabRequests, setMyCollabRequests] = reactExports.useState([]);
+  const [applyTo, setApplyTo] = reactExports.useState(null);
+  const [applyMessage, setApplyMessage] = reactExports.useState("");
   const load = async () => {
     setLoading(true);
     const [{
@@ -145,7 +148,33 @@ function FeedPage() {
     }).limit(8);
     if (followingIds) collabQ.in("user_id", followingIds);
     const [p, l, c] = await Promise.all([projQ, logQ, collabQ]);
-    const merged = [...(p.data ?? []).map((d) => ({
+    const projectIds = (p.data ?? []).map((d) => d.id);
+    let recentCommentsByProject = {};
+    if (projectIds.length > 0) {
+      const {
+        data: commentsData
+      } = await supabase.from("comments").select("id, body, created_at, project_id, user:profiles!comments_user_id_fkey(id, username, display_name, avatar_url)").in("project_id", projectIds).order("created_at", {
+        ascending: false
+      });
+      for (const comment of commentsData ?? []) {
+        const key = comment.project_id;
+        if (!recentCommentsByProject[key]) recentCommentsByProject[key] = [];
+        if (recentCommentsByProject[key].length < 2) recentCommentsByProject[key].push(comment);
+      }
+    }
+    const projects = (p.data ?? []).map((d) => ({
+      ...d,
+      recent_comments: recentCommentsByProject[d.id] ?? []
+    }));
+    if (user) {
+      const {
+        data: reqs
+      } = await supabase.from("collab_requests").select("post_id").eq("sender_id", user.id);
+      setMyCollabRequests((reqs ?? []).map((r) => r.post_id));
+    } else {
+      setMyCollabRequests([]);
+    }
+    const merged = [...projects.map((d) => ({
       kind: "project",
       created_at: d.created_at,
       data: d
@@ -165,7 +194,33 @@ function FeedPage() {
   reactExports.useEffect(() => {
     load();
   }, [tab, user?.id]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "max-w-6xl mx-auto p-4 md:p-8 pb-24", children: [
+  const applyToCollab = async () => {
+    if (!user || !applyTo) return;
+    if (myCollabRequests.includes(applyTo.id)) {
+      toast.error("You already applied to this collab");
+      setApplyTo(null);
+      setApplyMessage("");
+      return;
+    }
+    const {
+      error
+    } = await supabase.from("collab_requests").insert({
+      post_id: applyTo.id,
+      sender_id: user.id,
+      message: applyMessage.trim() || "Hi! I’d love to join this."
+    });
+    if (error) {
+      toast.error(error.message || "Could not send collab request");
+      setApplyTo(null);
+      setApplyMessage("");
+      return;
+    }
+    toast.success("Request sent");
+    setMyCollabRequests((prev) => [...prev, applyTo.id]);
+    setApplyTo(null);
+    setApplyMessage("");
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "feed-shell", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsxs("header", { className: "brutal-card-flat p-6 md:p-10 mb-8 relative overflow-hidden scan-noise", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid-bg absolute inset-0 opacity-50" }),
       /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "relative", children: [
@@ -210,21 +265,32 @@ function FeedPage() {
       id: "following",
       label: "Following",
       icon: Users
-    }].map((t) => /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: () => setTab(t.id), className: `flex items-center gap-2 px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`, children: [
+    }].map((t) => /* @__PURE__ */ jsxRuntimeExports.jsxs("button", { onClick: () => setTab(t.id), className: `feed-tab flex items-center gap-2 px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t.id ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`, children: [
       /* @__PURE__ */ jsxRuntimeExports.jsx(t.icon, { className: "w-3.5 h-3.5" }),
       " ",
       t.label
     ] }, t.id)) }),
-    loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "grid md:grid-cols-2 lg:grid-cols-3 gap-4", children: Array.from({
-      length: 6
-    }).map((_, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat h-64 animate-pulse" }, i)) }) : items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat p-10 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-muted-foreground", children: [
+    loading ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "feed-stack", children: Array.from({
+      length: 4
+    }).map((_, i) => /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat h-72 animate-pulse" }, i)) }) : items.length === 0 ? /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "brutal-card-flat p-10 text-center", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("p", { className: "text-muted-foreground", children: [
       "No activity yet. ",
       tab === "following" && "Follow some builders to see their work here."
-    ] }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "columns-1 md:columns-2 lg:columns-3 gap-4 [column-fill:balance]", children: items.map((it, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "break-inside-avoid mb-4", children: [
-      it.kind === "project" && /* @__PURE__ */ jsxRuntimeExports.jsx(ProjectCard, { project: it.data, accentSeed: i, size: i % 5 === 0 ? "lg" : "md" }),
+    ] }) }) : /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "feed-stack", children: items.map((it, i) => /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      it.kind === "project" && /* @__PURE__ */ jsxRuntimeExports.jsx(ProjectCard, { project: it.data, accentSeed: i, size: "md" }),
       it.kind === "log" && /* @__PURE__ */ jsxRuntimeExports.jsx(BuildLogCard, { log: it.data }),
-      it.kind === "collab" && /* @__PURE__ */ jsxRuntimeExports.jsx(CollabCard, { post: it.data })
-    ] }, `${it.kind}-${"id" in it.data ? it.data.id : i}`)) })
+      it.kind === "collab" && /* @__PURE__ */ jsxRuntimeExports.jsx(CollabCard, { post: it.data, onApply: user && it.data.user.id !== user.id && !myCollabRequests.includes(it.data.id) ? () => setApplyTo(it.data) : void 0, isApplied: !!(user && myCollabRequests.includes(it.data.id)) })
+    ] }, `${it.kind}-${"id" in it.data ? it.data.id : i}`)) }),
+    applyTo && /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "fixed inset-0 z-50 grid place-items-center bg-black/70 p-4", onClick: () => setApplyTo(null), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "brutal-card w-full max-w-lg p-6", onClick: (e) => e.stopPropagation(), children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "mb-4 flex items-center justify-between gap-3", children: [
+        /* @__PURE__ */ jsxRuntimeExports.jsxs("h2", { className: "font-display text-2xl font-bold", children: [
+          "Apply to: ",
+          applyTo.title
+        ] }),
+        /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: () => setApplyTo(null), className: "rounded-none border-2 border-white/20 p-2 hover:border-white/40", children: /* @__PURE__ */ jsxRuntimeExports.jsx(X, { className: "h-4 w-4" }) })
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("textarea", { value: applyMessage, onChange: (e) => setApplyMessage(e.target.value), placeholder: "Why are you a good fit?", className: "brutal-input min-h-[120px] mb-3" }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx("button", { onClick: applyToCollab, className: "brutal-btn w-full justify-center", children: "Send request" })
+    ] }) })
   ] });
 }
 export {

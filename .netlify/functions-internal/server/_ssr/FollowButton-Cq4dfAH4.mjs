@@ -1,6 +1,6 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth } from "./router-vnISQ9uA.mjs";
+import { u as useAuth } from "./router-BZVH0095.mjs";
 function FollowButton({ targetId, size = "md" }) {
   const { user } = useAuth();
   const [following, setFollowing] = reactExports.useState(false);

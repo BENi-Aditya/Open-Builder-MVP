@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Send, ArrowLeft, MessageSquare, Paperclip, X, Reply, SmilePlus } from "lucide-react";
 import { toast } from "sonner";
 import { uploadMedia } from "@/lib/upload";
+import { createNotification } from "@/lib/notifications";
 
 export const Route = createFileRoute("/chat")({
   component: ChatPage,
@@ -180,7 +181,7 @@ function ChatPage() {
           ? "sent a video"
           : content.trim().slice(0, 50) + (content.trim().length > 50 ? "..." : "");
 
-      await supabase.from("notifications").insert({
+      await createNotification({
         user_id: activeChat.otherUser.id,
         actor_id: user.id,
         type: "chat_message",

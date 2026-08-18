@@ -6,6 +6,7 @@ import { Avatar } from "@/components/AppShell";
 import { formatDistanceToNow } from "date-fns";
 import { Heart, MessageCircle, UserPlus, Users, Bell, Check, X, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { createNotification } from "@/lib/notifications";
 
 export const Route = createFileRoute("/notifications")({ component: NotificationsPage });
 
@@ -73,11 +74,28 @@ function NotificationsPage() {
       const { data: chatId, error } = await (supabase as any).rpc("accept_collab_request", { request_id: requestId });
       if (error) return toast.error(error.message);
 
+      await createNotification({
+        userId: request.sender_id,
+        actorId: user?.id ?? null,
+        type: "collab_accepted",
+        entityId: requestId,
+        entityType: "collab_request",
+        body: `Your collab request was accepted`,
+      });
+
       toast.success("Request accepted! Chat started.");
       navigate({ to: "/chat", search: { id: chatId } });
     } else {
       const { error } = await supabase.from("collab_requests").update({ status }).eq("id", requestId);
       if (error) return toast.error(error.message);
+      await createNotification({
+        userId: request.sender_id,
+        actorId: user?.id ?? null,
+        type: "collab_accepted",
+        entityId: requestId,
+        entityType: "collab_request",
+        body: `Your collab request was declined`,
+      });
       toast.success("Request declined");
     }
     load();

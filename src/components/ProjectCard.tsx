@@ -4,7 +4,15 @@ import { Avatar } from "@/components/AppShell";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
+import { createNotification } from "@/lib/notifications";
 import { formatDistanceToNow } from "date-fns";
+
+export type ProjectCommentPreview = {
+  id: string;
+  body: string;
+  created_at: string;
+  user: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+};
 
 export type FeedProject = {
   id: string;
@@ -20,6 +28,7 @@ export type FeedProject = {
   demo_url: string | null;
   created_at: string;
   owner: { id: string; username: string; display_name: string | null; avatar_url: string | null };
+  recent_comments?: ProjectCommentPreview[];
 };
 
 const COLOR_BY_INDEX = ["var(--grape)", "var(--tangerine)", "var(--sky)", "var(--primary)", "var(--citrus)"];
@@ -47,6 +56,15 @@ export function ProjectCard({ project, accentSeed = 0, size = "md" }: { project:
     } else {
       await supabase.from("likes").insert({ user_id: user.id, project_id: project.id });
       setLiked(true); setLikes((n) => n + 1);
+
+      await createNotification({
+        userId: project.owner.id,
+        actorId: user.id,
+        type: "like",
+        entityId: project.id,
+        entityType: "project",
+        body: `${user.user_metadata?.username || "Someone"} liked your project`,
+      });
     }
   };
   const toggleSave = async () => {
@@ -60,66 +78,124 @@ export function ProjectCard({ project, accentSeed = 0, size = "md" }: { project:
     }
   };
 
-  const heights = { sm: "h-32", md: "h-44", lg: "h-64" };
+  const heights = { sm: "h-40", md: "h-56", lg: "h-72" };
 
   return (
-    <article className="brutal-card overflow-hidden flex flex-col group">
+    <article className="feed-item-card brutal-card group flex w-full flex-col overflow-hidden bg-[color:var(--card)] transition-all duration-200 hover:-translate-y-0.5">
+      <div className="flex items-center justify-between gap-3 border-b-2 border-white/10 px-3 py-2.5">
+        <Link to="/u/$username" params={{ username: project.owner.username }} className="flex min-w-0 items-center gap-2">
+          <Avatar profile={project.owner} size={28} />
+          <div className="min-w-0">
+            <div className="truncate text-xs font-bold">{project.owner.display_name || project.owner.username}</div>
+            <div className="truncate text-[10px] font-mono text-muted-foreground">@{project.owner.username}</div>
+          </div>
+        </Link>
+
+        <button
+          onClick={toggleSave}
+          aria-label={saved ? "Remove save" : "Save project"}
+          className={`shrink-0 border-2 p-1.5 transition-colors ${saved ? "border-primary bg-primary text-primary-foreground" : "border-transparent hover:border-white/30 hover:bg-white/5"}`}
+        >
+          <Bookmark className="h-3.5 w-3.5" fill={saved ? "currentColor" : "none"} />
+        </button>
+      </div>
+
       <Link to="/p/$id" params={{ id: project.id }} className="block relative overflow-hidden">
-        <div className={`${heights[size]} relative bg-ink overflow-hidden border-b border-white/10`}>
+        <div className={`${heights[size]} relative bg-ink overflow-hidden`}>
           <div className="absolute inset-0 grid-bg opacity-20" />
           {project.cover_url ? (
-            <img 
-              src={project.cover_url} 
-              alt={project.title} 
-              className="w-full h-full object-cover opacity-70 grayscale-[20%] group-hover:opacity-100 group-hover:grayscale-0 transition-all duration-300" 
+            <img
+              src={project.cover_url}
+              alt={project.title}
+              className="h-full w-full object-cover opacity-90 transition-transform duration-300 group-hover:scale-[1.02]"
             />
           ) : (
-            <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-primary/5 to-transparent">
+            <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-primary/10 via-transparent to-[var(--grape)]/30">
               <span className="font-display font-black text-5xl text-white/10 select-none">{project.title[0]?.toUpperCase()}</span>
             </div>
           )}
           <div className="absolute inset-0 scan-noise opacity-10" />
           {project.category && (
-            <span className="absolute top-2 left-2 pill bg-black text-white border-white z-10">{project.category}</span>
+            <span className="absolute left-3 top-3 pill bg-black text-white border-white z-10">{project.category}</span>
           )}
         </div>
       </Link>
-      <div className="p-4 flex-1 flex flex-col gap-2">
-        <Link to="/p/$id" params={{ id: project.id }}>
-          <h3 className="font-display font-bold text-lg leading-tight hover:text-primary">{project.title}</h3>
-        </Link>
-        {project.tagline && <p className="text-sm text-muted-foreground line-clamp-2">{project.tagline}</p>}
+
+      <div className="flex flex-1 flex-col gap-2 p-3.5">
+        <div className="flex items-center justify-between gap-3">
+          <Link to="/p/$id" params={{ id: project.id }} className="min-w-0">
+            <h3 className="font-display text-xl font-black leading-tight hover:text-primary">{project.title}</h3>
+          </Link>
+          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">
+            {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
+          </div>
+        </div>
+
+        {project.tagline && <p className="text-sm leading-relaxed text-muted-foreground line-clamp-2">{project.tagline}</p>}
+
         {project.tech_stack && project.tech_stack.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1">
-            {project.tech_stack.slice(0, 4).map((t) => (
+          <div className="flex flex-wrap gap-1.5">
+            {project.tech_stack.slice(0, 3).map((t) => (
               <span key={t} className="pill text-muted-foreground">{t}</span>
             ))}
           </div>
         )}
-        <div className="flex items-center justify-between mt-auto pt-3 border-t-2 border-white/10">
-          <Link to="/u/$username" params={{ username: project.owner.username }} className="flex items-center gap-2 min-w-0">
-            <Avatar profile={project.owner} size={24} />
-            <span className="text-xs font-mono truncate">@{project.owner.username}</span>
-          </Link>
-          <div className="flex items-center gap-1">
-            <button onClick={toggleLike} className={`flex items-center gap-1 px-2 py-1 border-2 ${liked ? "border-[var(--citrus)] text-[var(--citrus)]" : "border-transparent hover:border-white/30"}`}>
-              <Heart className="w-3.5 h-3.5" fill={liked ? "currentColor" : "none"} />
-              <span className="text-xs font-bold">{likes}</span>
+
+        <div className="mt-1 flex items-center justify-between gap-2 border-t-2 border-white/10 pt-2.5">
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={toggleLike}
+              className={`flex items-center gap-1.5 border-2 px-2 py-1 text-xs font-bold transition-colors ${liked ? "border-[var(--citrus)] bg-[var(--citrus)]/10 text-[var(--citrus)]" : "border-transparent hover:border-white/30 hover:bg-white/5"}`}
+            >
+              <Heart className="h-3.5 w-3.5" fill={liked ? "currentColor" : "none"} />
+              {likes}
             </button>
-            <Link to="/p/$id" params={{ id: project.id }} className="flex items-center gap-1 px-2 py-1 hover:border-2 hover:border-white/30">
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span className="text-xs font-bold">{project.comment_count}</span>
+
+            <Link to="/p/$id" params={{ id: project.id }} className="flex items-center gap-1.5 border-2 border-transparent px-2 py-1 text-xs font-bold hover:border-white/30 hover:bg-white/5">
+              <MessageCircle className="h-3.5 w-3.5" />
+              {project.comment_count}
             </Link>
-            <button onClick={toggleSave} className={`px-2 py-1 border-2 ${saved ? "border-primary text-primary" : "border-transparent hover:border-white/30"}`}>
-              <Bookmark className="w-3.5 h-3.5" fill={saved ? "currentColor" : "none"} />
-            </button>
-            {project.demo_url && <a href={project.demo_url} target="_blank" rel="noreferrer" className="px-2 py-1 hover:border-2 hover:border-white/30"><ExternalLink className="w-3.5 h-3.5" /></a>}
-            {project.github_url && <a href={project.github_url} target="_blank" rel="noreferrer" className="px-2 py-1 hover:border-2 hover:border-white/30"><Github className="w-3.5 h-3.5" /></a>}
+          </div>
+
+          <div className="flex items-center gap-1 text-muted-foreground">
+            {project.demo_url && (
+              <a href={project.demo_url} target="_blank" rel="noreferrer" className="border-2 border-transparent p-1.5 hover:border-white/30 hover:bg-white/5" aria-label="Open demo">
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            )}
+            {project.github_url && (
+              <a href={project.github_url} target="_blank" rel="noreferrer" className="border-2 border-transparent p-1.5 hover:border-white/30 hover:bg-white/5" aria-label="Open GitHub">
+                <Github className="h-3.5 w-3.5" />
+              </a>
+            )}
           </div>
         </div>
-        <div className="text-[10px] font-mono uppercase text-muted-foreground">
-          shipped {formatDistanceToNow(new Date(project.created_at), { addSuffix: true })}
-        </div>
+
+        {project.recent_comments && project.recent_comments.length > 0 && (
+          <div className="mt-2 border-t-2 border-white/10 pt-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-muted-foreground">Comments</span>
+              <Link to="/p/$id" params={{ id: project.id }} className="text-[10px] font-mono uppercase tracking-[0.12em] text-primary hover:text-primary/80">
+                View all
+              </Link>
+            </div>
+
+            <div className="space-y-2">
+              {project.recent_comments.slice(0, 2).map((comment) => (
+                <div key={comment.id} className="flex items-start gap-2 rounded-none border border-white/10 bg-white/[0.02] p-2">
+                  <Avatar profile={comment.user} size={22} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 text-[10px] font-mono text-muted-foreground">
+                      <span className="font-bold text-foreground">{comment.user.display_name || comment.user.username}</span>
+                      <span>@{comment.user.username}</span>
+                    </div>
+                    <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground line-clamp-2">{comment.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </article>
   );

@@ -27,7 +27,7 @@ import "../_libs/iceberg-js.mjs";
 import "../_libs/supabase__auth-js.mjs";
 import "tslib";
 import "../_libs/supabase__functions-js.mjs";
-const appCss = "/assets/styles-j0i4C5w2.css";
+const appCss = "/assets/styles-D1lcL2Ms.css";
 const Ctx = reactExports.createContext({
   user: null,
   session: null,
@@ -360,57 +360,57 @@ function RootComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(AppShell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) })
   ] }) });
 }
-const $$splitComponentImporter$b = () => import("./settings-DMxkFJ2N.mjs");
+const $$splitComponentImporter$b = () => import("./settings-V_Rn9BNA.mjs");
 const Route$b = createFileRoute("/settings")({
   component: lazyRouteComponent($$splitComponentImporter$b, "component")
 });
-const $$splitComponentImporter$a = () => import("./seed-CKGNDvVE.mjs");
+const $$splitComponentImporter$a = () => import("./seed-CXxYJjaY.mjs");
 const Route$a = createFileRoute("/seed")({
   component: lazyRouteComponent($$splitComponentImporter$a, "component")
 });
-const $$splitComponentImporter$9 = () => import("./saved-DOX_tGVM.mjs");
+const $$splitComponentImporter$9 = () => import("./saved-BCobkmyq.mjs");
 const Route$9 = createFileRoute("/saved")({
   component: lazyRouteComponent($$splitComponentImporter$9, "component")
 });
-const $$splitComponentImporter$8 = () => import("./notifications-Da3NmUAa.mjs");
+const $$splitComponentImporter$8 = () => import("./notifications-2TP0Puc7.mjs");
 const Route$8 = createFileRoute("/notifications")({
   component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-const $$splitComponentImporter$7 = () => import("./new-Ce1uk125.mjs");
+const $$splitComponentImporter$7 = () => import("./new-Bv3z1O6q.mjs");
 const Route$7 = createFileRoute("/new")({
   component: lazyRouteComponent($$splitComponentImporter$7, "component")
 });
-const $$splitComponentImporter$6 = () => import("./explore-hQfekSeW.mjs");
+const $$splitComponentImporter$6 = () => import("./explore-BJ6NeMXF.mjs");
 const Route$6 = createFileRoute("/explore")({
   component: lazyRouteComponent($$splitComponentImporter$6, "component"),
   validateSearch: (s) => ({
     q: s.q || ""
   })
 });
-const $$splitComponentImporter$5 = () => import("./collab-CqmeqWE4.mjs");
+const $$splitComponentImporter$5 = () => import("./collab-BL8-0QJU.mjs");
 const Route$5 = createFileRoute("/collab")({
   component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
-const $$splitComponentImporter$4 = () => import("./chat-Ccic9f-v.mjs");
+const $$splitComponentImporter$4 = () => import("./chat-C0DH5tuu.mjs");
 const Route$4 = createFileRoute("/chat")({
   component: lazyRouteComponent($$splitComponentImporter$4, "component"),
   validateSearch: (s) => ({
     id: s.id || void 0
   })
 });
-const $$splitComponentImporter$3 = () => import("./auth-BA-XbJlO.mjs");
+const $$splitComponentImporter$3 = () => import("./auth-B3vg6U0i.mjs");
 const Route$3 = createFileRoute("/auth")({
   component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-const $$splitComponentImporter$2 = () => import("./index-B4-gBE_V.mjs");
+const $$splitComponentImporter$2 = () => import("./index-A2obLTDS.mjs");
 const Route$2 = createFileRoute("/")({
   component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-const $$splitComponentImporter$1 = () => import("./u._username-7hg8rQak.mjs");
+const $$splitComponentImporter$1 = () => import("./u._username--JkpQzHJ.mjs");
 const Route$1 = createFileRoute("/u/$username")({
   component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-const $$splitComponentImporter = () => import("./p._id-ZUnONbap.mjs");
+const $$splitComponentImporter = () => import("./p._id-4KDAPdQx.mjs");
 const Route = createFileRoute("/p/$id")({
   component: lazyRouteComponent($$splitComponentImporter, "component")
 });
