@@ -1,6 +1,6 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
-import { u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
+import { u as useAuth, A as Avatar, d as createNotification } from "./router-CUPGUMYq.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
 import { b as Bookmark, e as Heart, h as MessageCircle, E as ExternalLink, G as Github } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";

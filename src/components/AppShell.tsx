@@ -60,9 +60,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [user]);
 
   return (
-    <div className="grid min-h-dvh grid-cols-1 grid-bg md:[grid-template-columns:minmax(0,260px)_1fr]">
+    <div className="min-h-dvh grid-bg">
       {/* Sidebar */}
-      <aside className="hidden md:flex flex-col gap-4 border-r-2 border-white/10 p-5 sticky top-0 h-screen overflow-y-auto">
+      <aside className="fixed left-0 top-0 hidden h-dvh w-[260px] flex-col gap-4 overflow-y-auto border-r-2 border-white/10 p-5 md:flex">
         <Link to="/" className="flex items-center gap-2 mb-2">
           <img
             src="/logo.webp"
@@ -130,7 +130,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-0">{children}</main>
+      <main className="min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:ml-[260px] md:pb-0">{children}</main>
 
       {/* mobile bottom bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">

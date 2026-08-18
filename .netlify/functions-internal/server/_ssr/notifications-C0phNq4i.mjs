@@ -1,7 +1,7 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { d as useNavigate, L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
+import { u as useAuth, A as Avatar, d as createNotification } from "./router-CUPGUMYq.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
 import { B as Bell, i as MessageSquare, C as Check, q as Users, U as UserPlus, h as MessageCircle, e as Heart, X } from "../_libs/lucide-react.mjs";
 import { f as formatDistanceToNow } from "../_libs/date-fns.mjs";

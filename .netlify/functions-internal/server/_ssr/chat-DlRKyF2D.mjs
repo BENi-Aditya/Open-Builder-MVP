@@ -1,7 +1,7 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { L as Link } from "../_libs/tanstack__react-router.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
-import { a as Route$4, u as useAuth, A as Avatar, d as createNotification } from "./router-rHJT1VjN.mjs";
+import { a as Route$4, u as useAuth, A as Avatar, d as createNotification } from "./router-CUPGUMYq.mjs";
 import { R as Root2, T as Trigger, P as Portal, C as Content2 } from "../_libs/radix-ui__react-popover.mjs";
 import { c as clsx } from "../_libs/clsx.mjs";
 import { t as twMerge } from "../_libs/tailwind-merge.mjs";

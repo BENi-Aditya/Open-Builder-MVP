@@ -27,7 +27,7 @@ import "../_libs/iceberg-js.mjs";
 import "../_libs/supabase__auth-js.mjs";
 import "tslib";
 import "../_libs/supabase__functions-js.mjs";
-const appCss = "/assets/styles-DeCM_d26.css";
+const appCss = "/assets/styles-gA4e8jOc.css";
 const Ctx = reactExports.createContext({
   user: null,
   session: null,
@@ -162,8 +162,8 @@ function AppShell({ children }) {
       ch.unsubscribe();
     };
   }, [user]);
-  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grid min-h-dvh grid-cols-1 grid-bg md:[grid-template-columns:minmax(0,260px)_1fr]", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "hidden md:flex flex-col gap-4 border-r-2 border-white/10 p-5 sticky top-0 h-screen overflow-y-auto", children: [
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "min-h-dvh grid-bg", children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("aside", { className: "fixed left-0 top-0 hidden h-dvh w-[260px] flex-col gap-4 overflow-y-auto border-r-2 border-white/10 p-5 md:flex", children: [
       /* @__PURE__ */ jsxRuntimeExports.jsxs(Link, { to: "/", className: "flex items-center gap-2 mb-2", children: [
         /* @__PURE__ */ jsxRuntimeExports.jsx(
           "img",
@@ -240,7 +240,7 @@ function AppShell({ children }) {
         " Join the builders"
       ] }) })
     ] }),
-    /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:pb-0", children }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("main", { className: "min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:ml-[260px] md:pb-0", children }),
     /* @__PURE__ */ jsxRuntimeExports.jsx("nav", { className: "fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden", children: NAV.map((n) => {
       const active = loc.pathname === n.to || n.to !== "/" && loc.pathname.startsWith(n.to);
       return /* @__PURE__ */ jsxRuntimeExports.jsxs(
@@ -433,57 +433,57 @@ function RootComponent() {
     /* @__PURE__ */ jsxRuntimeExports.jsx(AppShell, { children: /* @__PURE__ */ jsxRuntimeExports.jsx(Outlet, {}) })
   ] }) });
 }
-const $$splitComponentImporter$b = () => import("./settings-ZwY0exfB.mjs");
+const $$splitComponentImporter$b = () => import("./settings-DeYUE-s8.mjs");
 const Route$b = createFileRoute("/settings")({
   component: lazyRouteComponent($$splitComponentImporter$b, "component")
 });
-const $$splitComponentImporter$a = () => import("./seed-j-rm54Ib.mjs");
+const $$splitComponentImporter$a = () => import("./seed-C6aJCxP-.mjs");
 const Route$a = createFileRoute("/seed")({
   component: lazyRouteComponent($$splitComponentImporter$a, "component")
 });
-const $$splitComponentImporter$9 = () => import("./saved-x9Ul5lrD.mjs");
+const $$splitComponentImporter$9 = () => import("./saved-fGoadxj0.mjs");
 const Route$9 = createFileRoute("/saved")({
   component: lazyRouteComponent($$splitComponentImporter$9, "component")
 });
-const $$splitComponentImporter$8 = () => import("./notifications-Crr7_OS3.mjs");
+const $$splitComponentImporter$8 = () => import("./notifications-C0phNq4i.mjs");
 const Route$8 = createFileRoute("/notifications")({
   component: lazyRouteComponent($$splitComponentImporter$8, "component")
 });
-const $$splitComponentImporter$7 = () => import("./new-C1g5K2uY.mjs");
+const $$splitComponentImporter$7 = () => import("./new-DASrgLjr.mjs");
 const Route$7 = createFileRoute("/new")({
   component: lazyRouteComponent($$splitComponentImporter$7, "component")
 });
-const $$splitComponentImporter$6 = () => import("./explore-BF54_Unx.mjs");
+const $$splitComponentImporter$6 = () => import("./explore-Dej86zFw.mjs");
 const Route$6 = createFileRoute("/explore")({
   component: lazyRouteComponent($$splitComponentImporter$6, "component"),
   validateSearch: (s) => ({
     q: s.q || ""
   })
 });
-const $$splitComponentImporter$5 = () => import("./collab-byNSnosa.mjs");
+const $$splitComponentImporter$5 = () => import("./collab-Dk7EuVpv.mjs");
 const Route$5 = createFileRoute("/collab")({
   component: lazyRouteComponent($$splitComponentImporter$5, "component")
 });
-const $$splitComponentImporter$4 = () => import("./chat-DDMDT420.mjs");
+const $$splitComponentImporter$4 = () => import("./chat-DlRKyF2D.mjs");
 const Route$4 = createFileRoute("/chat")({
   component: lazyRouteComponent($$splitComponentImporter$4, "component"),
   validateSearch: (s) => ({
     id: s.id || void 0
   })
 });
-const $$splitComponentImporter$3 = () => import("./auth-CAhnruiN.mjs");
+const $$splitComponentImporter$3 = () => import("./auth-4k7J7Jym.mjs");
 const Route$3 = createFileRoute("/auth")({
   component: lazyRouteComponent($$splitComponentImporter$3, "component")
 });
-const $$splitComponentImporter$2 = () => import("./index-DuGmHJuA.mjs");
+const $$splitComponentImporter$2 = () => import("./index-CXaMI8Dl.mjs");
 const Route$2 = createFileRoute("/")({
   component: lazyRouteComponent($$splitComponentImporter$2, "component")
 });
-const $$splitComponentImporter$1 = () => import("./u._username-rxzgJdQk.mjs");
+const $$splitComponentImporter$1 = () => import("./u._username-BNTZZui7.mjs");
 const Route$1 = createFileRoute("/u/$username")({
   component: lazyRouteComponent($$splitComponentImporter$1, "component")
 });
-const $$splitComponentImporter = () => import("./p._id-DQrFg9AQ.mjs");
+const $$splitComponentImporter = () => import("./p._id-D6YjxBhY.mjs");
 const Route = createFileRoute("/p/$id")({
   component: lazyRouteComponent($$splitComponentImporter, "component")
 });

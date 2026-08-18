@@ -1,6 +1,6 @@
 import { r as reactExports, j as jsxRuntimeExports } from "../_libs/react.mjs";
 import { d as useNavigate, L as Link } from "../_libs/tanstack__react-router.mjs";
-import { u as useAuth } from "./router-rHJT1VjN.mjs";
+import { u as useAuth } from "./router-CUPGUMYq.mjs";
 import { s as supabase } from "./client-CZxeSKt5.mjs";
 import { u as uploadMedia } from "./upload-y4PVd49O.mjs";
 import { t as toast } from "../_libs/sonner.mjs";
