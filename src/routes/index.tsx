@@ -145,6 +145,11 @@ function FeedPage() {
               <Link to="/explore" className="brutal-btn brutal-btn-ghost">Explore →</Link>
             </div>
           )}
+          {user && (
+            <Link to="/new" className="brutal-btn mt-6 new-project-btn">
+              <Rocket className="h-4 w-4" /> Ship full project
+            </Link>
+          )}
         </div>
       </header>
 
@@ -167,7 +172,7 @@ function FeedPage() {
       )}
 
       <div className="sticky top-0 z-30 -mx-4 bg-background/95 px-4 pt-2 backdrop-blur-sm md:-mx-0 md:px-0">
-        <div className="flex gap-1 mt-4 mb-4 border-b-2 border-white/10 overflow-x-auto">
+        <div className="flex gap-1 mt-4 mb-4 border-b-2 border-white/10 overflow-x-auto feed-tabs">
           {[
             { id: "all", label: "All", icon: Sparkles },
             { id: "trending", label: "Trending", icon: Flame },

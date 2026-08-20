@@ -84,7 +84,7 @@ export function Composer({ onPosted }: { onPosted?: () => void }) {
 
   if (!user || !profile) return null;
   return (
-    <div className="brutal-card-flat p-4 flex gap-3">
+    <div className="brutal-card-flat p-4 flex gap-3 composer-highlight">
       <Avatar profile={profile} size={36} />
       <div className="flex-1">
         <div className="mb-2 rounded-none border-2 border-white/10 bg-black/20 p-2">

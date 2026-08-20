@@ -7,6 +7,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { requestBrowserPermission } from "@/lib/notifications";
+import { Tutorial } from "@/components/Tutorial";
 
 const NAV = [
   { to: "/", label: "Feed", icon: Home },
@@ -87,11 +88,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <nav className="flex flex-col gap-1">
           {NAV.map((n) => {
             const active = loc.pathname === n.to || (n.to !== "/" && loc.pathname.startsWith(n.to));
+            const className = n.to === "/notifications" ? "notifications-icon" : n.to === "/chat" ? "messages-icon" : "";
             return (
               <Link
                 key={n.to}
                 to={n.to}
-                className={`flex items-center justify-between px-3 py-2 border-2 ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent hover:border-white/30"}`}
+                className={`flex items-center justify-between px-3 py-2 border-2 ${className} ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent hover:border-white/30"}`}
                 style={active ? { boxShadow: "3px 3px 0 0 #fff" } : {}}
               >
                 <span className="flex items-center gap-3 font-bold uppercase text-xs tracking-wider">
@@ -112,7 +114,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mt-auto pt-4 border-t-2 border-white/10">
           {user && profile ? (
             <div className="space-y-2">
-              <Link to="/u/$username" params={{ username: profile.username }} className="flex items-center gap-3 p-2 hover:bg-white/5">
+              <Link to="/u/$username" params={{ username: profile.username }} className="flex items-center gap-3 p-2 hover:bg-white/5 profile-menu">
                 <Avatar profile={profile} size={36} />
                 <div className="min-w-0">
                   <div className="font-bold text-sm truncate">{profile.display_name || profile.username}</div>
@@ -131,6 +133,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       </aside>
 
       <main className="min-w-0 pb-[calc(5.25rem+env(safe-area-inset-bottom))] md:ml-[260px] md:pb-0">{children}</main>
+
+      {/* Tutorial Component */}
+      {user && <Tutorial />}
 
       {/* mobile bottom bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
