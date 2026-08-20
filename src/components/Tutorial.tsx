@@ -85,6 +85,89 @@ export function Tutorial() {
   const [hasCompletedTutorial, setHasCompletedTutorial] = useState(true);
   const [manualStart, setManualStart] = useState(false);
   const [canProceed, setCanProceed] = useState(true); // Can always proceed by default
+  const [highlightPosition, setHighlightPosition] = useState<any>({});
+  const [tooltipPosition, setTooltipPosition] = useState<any>({});
+
+  // Update positions on scroll and resize
+  useEffect(() => {
+    const updatePositions = () => {
+      const step = TUTORIAL_STEPS[currentStep];
+      if (step.target) {
+        const element = document.querySelector(step.target);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          setHighlightPosition({
+            top: rect.top + window.scrollY,
+            left: rect.left + window.scrollX,
+            width: rect.width,
+            height: rect.height
+          });
+
+          // Calculate tooltip position
+          const position = step.position || "bottom";
+          let tooltipPos: any = {};
+
+          switch (position) {
+            case "top":
+              tooltipPos = {
+                top: rect.top + window.scrollY - 20,
+                left: rect.left + window.scrollX + rect.width / 2,
+                transform: "translate(-50%, -100%)"
+              };
+              break;
+            case "bottom":
+              tooltipPos = {
+                top: rect.bottom + window.scrollY + 20,
+                left: rect.left + window.scrollX + rect.width / 2,
+                transform: "translate(-50%, 0)"
+              };
+              break;
+            case "left":
+              tooltipPos = {
+                top: rect.top + window.scrollY + rect.height / 2,
+                left: rect.left + window.scrollX - 20,
+                transform: "translate(-100%, -50%)"
+              };
+              break;
+            case "right":
+              tooltipPos = {
+                top: rect.top + window.scrollY + rect.height / 2,
+                left: rect.right + window.scrollX + 20,
+                transform: "translate(0, -50%)"
+              };
+              break;
+            default:
+              tooltipPos = {
+                top: rect.bottom + window.scrollY + 20,
+                left: rect.left + window.scrollX + rect.width / 2,
+                transform: "translate(-50%, 0)"
+              };
+          }
+
+          setTooltipPosition(tooltipPos);
+        }
+      } else {
+        // Center tooltip when no target
+        setTooltipPosition({
+          position: 'fixed',
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)"
+        });
+      }
+    };
+
+    if (isActive) {
+      updatePositions();
+      window.addEventListener('scroll', updatePositions);
+      window.addEventListener('resize', updatePositions);
+
+      return () => {
+        window.removeEventListener('scroll', updatePositions);
+        window.removeEventListener('resize', updatePositions);
+      };
+    }
+  }, [isActive, currentStep]);
 
   useEffect(() => {
     if (!user) return;
@@ -220,114 +303,62 @@ export function Tutorial() {
   const step = TUTORIAL_STEPS[currentStep];
   const progress = ((currentStep + 1) / TUTORIAL_STEPS.length) * 100;
 
-  // Get target element position if specified
-  const getTargetPosition = () => {
-    if (!step.target) return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
-
-    const element = document.querySelector(step.target);
-    if (!element) return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
-
-    const rect = element.getBoundingClientRect();
-    const position = step.position || "bottom";
-
-    switch (position) {
-      case "top":
-        return {
-          top: `${rect.top - 20}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: "translate(-50%, -100%)"
-        };
-      case "bottom":
-        return {
-          top: `${rect.bottom + 20}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: "translate(-50%, 0)"
-        };
-      case "left":
-        return {
-          top: `${rect.top + rect.height / 2}px`,
-          left: `${rect.left - 20}px`,
-          transform: "translate(-100%, -50%)"
-        };
-      case "right":
-        return {
-          top: `${rect.top + rect.height / 2}px`,
-          left: `${rect.right + 20}px`,
-          transform: "translate(0, -50%)"
-        };
-      default:
-        return {
-          top: `${rect.bottom + 20}px`,
-          left: `${rect.left + rect.width / 2}px`,
-          transform: "translate(-50%, 0)"
-        };
-    }
-  };
-
-  const tooltipPosition = getTargetPosition();
-
   return (
     <>
       {/* Dark backdrop - everything except highlighted element */}
       <div className="fixed inset-0 bg-black/70 z-40 animate-in fade-in pointer-events-none" />
 
-      {/* Spotlight cutout for highlighted element */}
-      {step.target && (
+      {/* Spotlight cutout for highlighted element - scrolls with page */}
+      {step.target && highlightPosition.width && (
         <>
           {/* Bright highlight overlay on target */}
           <div
-            className="fixed z-45 pointer-events-none"
+            className="absolute z-45 pointer-events-none transition-all duration-200"
             style={{
-              ...(() => {
-                const element = document.querySelector(step.target);
-                if (!element) return {};
-                const rect = element.getBoundingClientRect();
-                return {
-                  top: `${rect.top}px`,
-                  left: `${rect.left}px`,
-                  width: `${rect.width}px`,
-                  height: `${rect.height}px`,
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                  boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)',
-                  borderRadius: '4px'
-                };
-              })()
+              top: `${highlightPosition.top}px`,
+              left: `${highlightPosition.left}px`,
+              width: `${highlightPosition.width}px`,
+              height: `${highlightPosition.height}px`,
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)',
+              borderRadius: '4px'
             }}
           />
           {/* Animated border around target */}
           <div
-            className="fixed z-50 pointer-events-none"
+            className="absolute z-50 pointer-events-none transition-all duration-200"
             style={{
-              ...(() => {
-                const element = document.querySelector(step.target);
-                if (!element) return {};
-                const rect = element.getBoundingClientRect();
-                return {
-                  top: `${rect.top - 4}px`,
-                  left: `${rect.left - 4}px`,
-                  width: `${rect.width + 8}px`,
-                  height: `${rect.height + 8}px`,
-                  border: "3px solid var(--primary)",
-                  borderRadius: "6px",
-                  animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-                };
-              })()
+              top: `${highlightPosition.top - 4}px`,
+              left: `${highlightPosition.left - 4}px`,
+              width: `${highlightPosition.width + 8}px`,
+              height: `${highlightPosition.height + 8}px`,
+              border: "3px solid var(--primary)",
+              borderRadius: "6px",
+              animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
             }}
           />
         </>
       )}
 
-      {/* Tutorial tooltip */}
+      {/* Tutorial tooltip - scrolls with page */}
       <div
-        className="fixed z-50 w-full max-w-xl px-4 animate-in slide-in-from-bottom"
+        className="absolute z-50 w-full px-4 animate-in slide-in-from-bottom"
         style={{
-          ...tooltipPosition,
+          maxWidth: window.innerWidth < 640 ? 'calc(100% - 2rem)' : '36rem',
           ...(window.innerWidth < 640 ? {
-            top: "auto",
-            bottom: "20px",
-            left: "50%",
-            transform: "translate(-50%, 0)"
-          } : {})
+            position: 'fixed',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translate(-50%, 0)'
+          } : tooltipPosition.position === 'fixed' ? {
+            position: 'fixed',
+            ...tooltipPosition
+          } : {
+            position: 'absolute',
+            top: `${tooltipPosition.top}px`,
+            left: `${tooltipPosition.left}px`,
+            transform: tooltipPosition.transform
+          })
         }}
       >
         <div className="brutal-card bg-card p-8 relative shadow-2xl">
