@@ -193,7 +193,7 @@ function FeedPage() {
           {items.map((it, i) => (
             <div key={`${it.kind}-${"id" in it.data ? it.data.id : i}`}>
               {it.kind === "project" && <ProjectCard project={it.data} accentSeed={i} size="md" />}
-              {it.kind === "log" && <BuildLogCard log={it.data} />}
+              {it.kind === "log" && <BuildLogCard log={it.data} onDelete={load} />}
               {it.kind === "collab" && (
                 <CollabCard
                   post={it.data}

@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Avatar } from "@/components/AppShell";
 import { formatDistanceToNow } from "date-fns";
-import { Zap, Heart, MessageCircle, Send, Trash2 } from "lucide-react";
+import { Zap, Heart, MessageCircle, Send, Trash2, Edit2, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
@@ -21,7 +21,7 @@ export type BuildLog = {
   user: { id: string; username: string; display_name: string | null; avatar_url: string | null };
 };
 
-export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
+export function BuildLogCard({ log: initialLog, onDelete }: { log: BuildLog; onDelete?: () => void }) {
   const { user, profile: me } = useAuth();
   const [log, setLog] = useState(initialLog);
   const [liked, setLiked] = useState(false);
@@ -29,6 +29,15 @@ export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
   const [comments, setComments] = useState<any[]>([]);
   const [commentLikes, setCommentLikes] = useState<string[]>([]);
   const [comment, setComment] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editBody, setEditBody] = useState(log.body);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const isOwner = user?.id === log.user.id;
+  const createdAt = new Date(log.created_at);
+  const now = new Date();
+  const minutesSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+  const canEdit = isOwner && minutesSinceCreation <= 15;
 
   useEffect(() => {
     setLog(initialLog);
@@ -136,6 +145,28 @@ export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
     loadComments();
   };
 
+  const deleteBuildLog = async () => {
+    if (!confirm("Delete this build log?")) return;
+    const { error } = await supabase.from("build_logs").delete().eq("id", log.id);
+    if (error) return toast.error(error.message);
+    toast.success("Build log deleted");
+    onDelete?.();
+  };
+
+  const saveEdit = async () => {
+    if (!editBody.trim()) return;
+    const { error } = await supabase.from("build_logs").update({ body: editBody.trim() }).eq("id", log.id);
+    if (error) return toast.error(error.message);
+    setLog(prev => ({ ...prev, body: editBody.trim() }));
+    setIsEditing(false);
+    toast.success("Build log updated");
+  };
+
+  const cancelEdit = () => {
+    setEditBody(log.body);
+    setIsEditing(false);
+  };
+
   return (
     <article className="brutal-card-flat p-4 flex gap-3">
       <Avatar profile={log.user} size={36} />
@@ -158,28 +189,50 @@ export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
             </>
           )}
         </div>
-        <p className="mt-2 text-sm whitespace-pre-wrap">{log.body}</p>
+        {isEditing ? (
+          <div className="mt-2">
+            <textarea
+              value={editBody}
+              onChange={(e) => setEditBody(e.target.value)}
+              className="brutal-input min-h-[80px] resize-y"
+              maxLength={1000}
+            />
+            <div className="flex gap-2 mt-2">
+              <button onClick={saveEdit} className="brutal-btn text-xs py-1">Save</button>
+              <button onClick={cancelEdit} className="brutal-btn brutal-btn-ghost text-xs py-1">Cancel</button>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-2 text-sm whitespace-pre-wrap">{log.body}</p>
+        )}
 
-        {/* Display images with original aspect ratio */}
+        {/* Display images with max height and click to preview */}
         {(log.media && log.media.length > 0) ? (
           <div className={`mt-3 grid gap-2 ${log.media.length === 1 ? 'grid-cols-1' : log.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
             {log.media.sort((a, b) => a.position - b.position).map((m) => (
-              <div key={m.id} className="border-2 border-white/20 overflow-hidden">
+              <div
+                key={m.id}
+                className="border-2 border-white/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+                onClick={() => setPreviewImage(m.url)}
+              >
                 <img
                   src={m.url}
                   alt=""
-                  className="w-full h-auto object-contain bg-black/5"
+                  className="w-full h-auto object-contain bg-black/5 max-h-64"
                   loading="lazy"
                 />
               </div>
             ))}
           </div>
         ) : log.image_url ? (
-          <div className="mt-3 border-2 border-white/20 overflow-hidden">
+          <div
+            className="mt-3 border-2 border-white/20 overflow-hidden cursor-pointer hover:border-primary/50 transition-colors"
+            onClick={() => setPreviewImage(log.image_url!)}
+          >
             <img
               src={log.image_url}
               alt=""
-              className="w-full h-auto object-contain bg-black/5"
+              className="w-full h-auto object-contain bg-black/5 max-h-64"
               loading="lazy"
             />
           </div>
@@ -202,6 +255,22 @@ export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
             <MessageCircle className="w-4 h-4" />
             {log.comment_count || 0}
           </button>
+          {canEdit && !isEditing && (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-primary transition-colors ml-auto"
+            >
+              <Edit2 className="w-3 h-3" /> Edit
+            </button>
+          )}
+          {isOwner && (
+            <button
+              onClick={deleteBuildLog}
+              className="flex items-center gap-1 text-xs font-mono text-muted-foreground hover:text-destructive transition-colors ml-auto"
+            >
+              <Trash2 className="w-3 h-3" /> Delete
+            </button>
+          )}
         </div>
 
         {showComments && (
@@ -268,6 +337,28 @@ export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
           </div>
         )}
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 p-2 border-2 border-white/20 hover:border-white/40 transition-colors"
+            aria-label="Close preview"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+          <img
+            src={previewImage}
+            alt="Preview"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </article>
   );
 }

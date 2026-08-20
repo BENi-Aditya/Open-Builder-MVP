@@ -113,7 +113,7 @@ function ProfilePage() {
           <div className="grid md:grid-cols-2 gap-4">{projects.map((p, i) => <ProjectCard key={p.id} project={p} accentSeed={i} />)}</div>
         ) : (
           logs.length === 0 ? <p className="text-muted-foreground text-center py-12">No build logs yet.</p> :
-          <div className="space-y-3">{logs.map((l) => <BuildLogCard key={l.id} log={l} />)}</div>
+          <div className="space-y-3">{logs.map((l) => <BuildLogCard key={l.id} log={l} onDelete={() => window.location.reload()} />)}</div>
         )}
       </div>
     </div>

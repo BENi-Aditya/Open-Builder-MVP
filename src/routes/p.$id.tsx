@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "@/components/AppShell";
-import { Heart, MessageCircle, Bookmark, Github, ExternalLink, Trash2, Send, Zap, Youtube } from "lucide-react";
+import { Heart, MessageCircle, Bookmark, Github, ExternalLink, Trash2, Send, Zap, Youtube, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import { uploadMedia } from "@/lib/upload";
@@ -24,6 +24,7 @@ function ProjectPage() {
   const [saved, setSaved] = useState(false);
   const [commentLikes, setCommentLikes] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -171,11 +172,15 @@ function ProjectPage() {
                 <h2 className="font-display font-bold text-xl mb-4">Gallery</h2>
                 <div className={`grid gap-3 ${project.media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
                   {project.media.sort((a: any, b: any) => a.position - b.position).map((m: any) => (
-                    <div key={m.id} className="border-2 border-white/20 overflow-hidden bg-black/5">
+                    <div
+                      key={m.id}
+                      className="border-2 border-white/20 overflow-hidden bg-black/5 cursor-pointer hover:border-primary/50 transition-colors"
+                      onClick={() => setPreviewImage(m.url)}
+                    >
                       <img
                         src={m.url}
                         alt=""
-                        className="w-full h-auto object-contain"
+                        className="w-full h-auto object-contain max-h-96"
                         loading="lazy"
                       />
                     </div>
@@ -214,14 +219,14 @@ function ProjectPage() {
                       {(l.media && l.media.length > 0) ? (
                         <div className={`mt-2 grid gap-2 ${l.media.length === 1 ? 'grid-cols-1' : l.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
                           {l.media.sort((a, b) => a.position - b.position).map((m) => (
-                            <div key={m.id} className="border-2 border-white/20 overflow-hidden bg-black/5">
-                              <img src={m.url} alt="" className="w-full h-auto object-contain" loading="lazy" />
+                            <div key={m.id} className="border-2 border-white/20 overflow-hidden bg-black/5 cursor-pointer hover:border-primary/50 transition-colors">
+                              <img src={m.url} alt="" className="w-full h-auto object-contain max-h-64" loading="lazy" />
                             </div>
                           ))}
                         </div>
                       ) : l.image_url ? (
-                        <div className="mt-2 border-2 border-white/20 overflow-hidden bg-black/5">
-                          <img src={l.image_url} alt="" className="w-full h-auto object-contain" loading="lazy" />
+                        <div className="mt-2 border-2 border-white/20 overflow-hidden bg-black/5 cursor-pointer hover:border-primary/50 transition-colors">
+                          <img src={l.image_url} alt="" className="w-full h-auto object-contain max-h-64" loading="lazy" />
                         </div>
                       ) : null}
                     </li>
@@ -297,6 +302,28 @@ function ProjectPage() {
           </aside>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewImage(null)}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-4 right-4 p-2 border-2 border-white/20 hover:border-white/40 transition-colors"
+            aria-label="Close preview"
+          >
+            <X className="w-6 h-6 text-white" />
+          </button>
+          <img
+            src={previewImage}
+            alt="Preview"
+            className="max-w-full max-h-full object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }
