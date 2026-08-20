@@ -29,7 +29,7 @@ function ProfilePage() {
       setProfile(p);
       const [{ data: pr }, { data: lg }, { count: fc }, { count: fgc }] = await Promise.all([
         supabase.from("projects").select("id, title, slug, tagline, cover_url, category, tech_stack, like_count, comment_count, github_url, demo_url, created_at, owner:profiles!projects_owner_id_fkey(id, username, display_name, avatar_url)").eq("owner_id", p.id).eq("visibility", "public").order("created_at", { ascending: false }),
-        supabase.from("build_logs").select("id, body, image_url, created_at, project_id, like_count, comment_count, project:projects(id, title), user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("user_id", p.id).order("created_at", { ascending: false }).limit(30),
+        supabase.from("build_logs").select("id, body, image_url, created_at, project_id, project:projects(id, title), user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("user_id", p.id).order("created_at", { ascending: false }).limit(30),
         supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", p.id),
         supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", p.id),
       ]);

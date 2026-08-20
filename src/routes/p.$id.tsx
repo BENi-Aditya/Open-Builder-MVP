@@ -31,7 +31,7 @@ function ProjectPage() {
     setProject(data);
     const [{ data: cm }, { data: lg }] = await Promise.all([
       supabase.from("comments").select("id, body, created_at, user_id, like_count, user:profiles!comments_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
-      supabase.from("build_logs").select("id, body, image_url, created_at, like_count, comment_count, user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
+      supabase.from("build_logs").select("id, body, image_url, created_at, user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
     ]);
     setComments(cm ?? []);
     setLogs(lg ?? []);
