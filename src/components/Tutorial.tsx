@@ -103,11 +103,38 @@ export function Tutorial() {
             height: rect.height
           });
 
-          // Calculate tooltip position
+          // Calculate tooltip position with smart positioning
           const position = step.position || "bottom";
           let tooltipPos: any = {};
+          const viewportHeight = window.innerHeight;
+          const viewportWidth = window.innerWidth;
+          const tooltipHeight = 400; // Approximate tooltip height
+          const tooltipWidth = viewportWidth < 640 ? viewportWidth - 32 : 576; // max-w-xl
 
-          switch (position) {
+          // Check if there's enough space below
+          const spaceBelow = viewportHeight - rect.bottom;
+          const spaceAbove = rect.top;
+          const spaceLeft = rect.left;
+          const spaceRight = viewportWidth - rect.right;
+
+          // Smart positioning - use position that has most space
+          let finalPosition = position;
+          if (position === "bottom" && spaceBelow < tooltipHeight && spaceAbove > spaceBelow) {
+            finalPosition = "top";
+          } else if (position === "top" && spaceAbove < tooltipHeight && spaceBelow > spaceAbove) {
+            finalPosition = "bottom";
+          } else if (position === "left" && spaceLeft < tooltipWidth && spaceRight > spaceLeft) {
+            finalPosition = "right";
+          } else if (position === "right" && spaceRight < tooltipWidth && spaceLeft > spaceRight) {
+            finalPosition = "left";
+          }
+
+          // For profile menu (usually at bottom), always show above
+          if (step.id === "profile" || rect.bottom + tooltipHeight > viewportHeight + window.scrollY) {
+            finalPosition = "top";
+          }
+
+          switch (finalPosition) {
             case "top":
               tooltipPos = {
                 top: rect.top + window.scrollY - 20,
@@ -142,6 +169,17 @@ export function Tutorial() {
                 left: rect.left + window.scrollX + rect.width / 2,
                 transform: "translate(-50%, 0)"
               };
+          }
+
+          // Ensure tooltip stays within viewport bounds
+          const tooltipLeft = tooltipPos.transform.includes('translate(-50%')
+            ? tooltipPos.left - tooltipWidth / 2
+            : tooltipPos.left;
+
+          if (tooltipLeft < 16) {
+            tooltipPos.left = tooltipWidth / 2 + 16;
+          } else if (tooltipLeft + tooltipWidth > viewportWidth - 16) {
+            tooltipPos.left = viewportWidth - tooltipWidth / 2 - 16;
           }
 
           setTooltipPosition(tooltipPos);
