@@ -1,9 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/settings")({ component: SettingsPage });
 
@@ -11,6 +12,7 @@ const STATUSES = ["not_looking", "open_to_collab", "seeking_cofounder", "seeking
 
 function SettingsPage() {
   const { user, profile, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const [form, setForm] = useState<any>({});
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
@@ -45,9 +47,48 @@ function SettingsPage() {
     finally { setSaving(false); }
   };
 
+  const startTutorial = () => {
+    // Clear the tutorial dismissed flag and set start flag for this user
+    if (user) {
+      localStorage.removeItem(`tutorial_dismissed_${user.id}`);
+      localStorage.setItem(`tutorial_start_${user.id}`, 'true');
+      toast.success("Starting tutorial...");
+      // Navigate to home
+      navigate({ to: "/" });
+      // Trigger the tutorial to start
+      setTimeout(() => {
+        window.dispatchEvent(new Event('storage'));
+      }, 500);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto p-6 md:p-10 pb-24">
       <h1 className="font-display font-black text-4xl mb-6">Settings</h1>
+
+      {/* Tutorial Section */}
+      <div className="brutal-card-flat p-6 mb-6 bg-gradient-to-br from-primary/5 to-transparent">
+        <div className="flex items-start gap-4">
+          <div className="flex-1">
+            <h2 className="font-display font-bold text-xl mb-2 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              App Tutorial
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              New to Open Builder or want a refresher? Take our interactive tutorial to learn about all features.
+            </p>
+            <button
+              onClick={startTutorial}
+              className="brutal-btn text-sm flex items-center gap-2"
+            >
+              <Sparkles className="w-4 h-4" />
+              Start Tutorial
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Profile Settings Form */}
       <form onSubmit={save} className="space-y-3">
         <F label="Display name"><input value={form.display_name || ""} onChange={(e) => setForm({ ...form, display_name: e.target.value })} className="brutal-input" /></F>
         <F label="Bio"><textarea value={form.bio || ""} onChange={(e) => setForm({ ...form, bio: e.target.value })} className="brutal-input min-h-[100px]" /></F>

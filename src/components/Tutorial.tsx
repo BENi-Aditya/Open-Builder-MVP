@@ -83,6 +83,7 @@ export function Tutorial() {
   const [isActive, setIsActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [hasCompletedTutorial, setHasCompletedTutorial] = useState(true);
+  const [manualStart, setManualStart] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -111,6 +112,23 @@ export function Tutorial() {
     };
 
     checkTutorial();
+
+    // Listen for manual tutorial start (from settings page)
+    const handleStorageChange = () => {
+      const shouldStart = localStorage.getItem(`tutorial_start_${user.id}`);
+      if (shouldStart === 'true') {
+        localStorage.removeItem(`tutorial_start_${user.id}`);
+        setManualStart(true);
+        setHasCompletedTutorial(false);
+        setIsActive(true);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    // Check immediately in case it was set in same window
+    handleStorageChange();
+
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [user]);
 
   const nextStep = () => {
