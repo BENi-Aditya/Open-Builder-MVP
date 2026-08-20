@@ -16,64 +16,64 @@ type TutorialStep = {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: "welcome",
-    title: "Welcome to Open Builder! 👋",
-    description: "Let's take a quick tour. We'll show you how to share your projects, connect with builders, and grow your network.",
+    title: "Welcome to Open Builder",
+    description: "Let's take a quick tour to help you get started. We'll show you how to share projects, connect with builders, and grow your network.",
     position: "bottom"
   },
   {
     id: "composer",
-    title: "Share Your Progress 🚀",
-    description: "Post build logs here! Share what you're working on, add images, and link to your projects.",
+    title: "Share Your Progress",
+    description: "Post build logs here to share what you're working on. Add images and link to your projects.",
     target: ".composer-highlight",
     position: "bottom",
-    action: "Try typing something here"
+    action: "Type something in the composer to continue"
   },
   {
     id: "feed",
-    title: "Discover Projects 🔥",
-    description: "Your feed shows projects, build logs, and collab posts. Switch tabs to see trending work or follow builders.",
+    title: "Discover Projects",
+    description: "Your feed shows projects, build logs, and collab posts. Switch tabs to see trending work or follow specific builders.",
     target: ".feed-tabs",
     position: "bottom"
   },
   {
     id: "interactions",
-    title: "Engage & Connect ❤️",
-    description: "Like, comment, and save projects you love. Click on any card to see more details.",
+    title: "Engage and Connect",
+    description: "Like, comment, and save projects you find interesting. Click on any card to see full details and engage with the community.",
     position: "top"
   },
   {
     id: "notifications",
-    title: "Stay Updated 🔔",
-    description: "Get notified when someone likes your work, comments, or sends a collab request.",
+    title: "Stay Updated",
+    description: "Get notified when someone likes your work, comments on your posts, or sends you a collab request.",
     target: ".notifications-icon",
     position: "bottom"
   },
   {
     id: "messages",
-    title: "Direct Messages 💬",
-    description: "Chat with other builders about collaborations and projects.",
+    title: "Direct Messages",
+    description: "Chat directly with other builders to discuss collaborations and projects.",
     target: ".messages-icon",
     position: "bottom"
   },
   {
     id: "new-project",
-    title: "Ship Full Projects 🎯",
-    description: "Ready to showcase a complete project? Click here to create your first project post.",
+    title: "Ship Full Projects",
+    description: "Ready to showcase a complete project? Click here to create a detailed project post with images, description, and links.",
     target: ".new-project-btn",
     position: "bottom",
     route: "/new"
   },
   {
     id: "profile",
-    title: "Your Builder Profile 👤",
-    description: "Edit your profile, showcase your tech stack, and set your collab status.",
+    title: "Your Builder Profile",
+    description: "Edit your profile to showcase your tech stack, skills, and set your collaboration status.",
     target: ".profile-menu",
     position: "left"
   },
   {
     id: "complete",
-    title: "You're All Set! ✨",
-    description: "Start building publicly, find your people, and ship insane things. Let's go!",
+    title: "You're All Set",
+    description: "Start building publicly, connect with other builders, and ship amazing projects. Good luck!",
     position: "bottom"
   }
 ];
@@ -84,6 +84,7 @@ export function Tutorial() {
   const [currentStep, setCurrentStep] = useState(0);
   const [hasCompletedTutorial, setHasCompletedTutorial] = useState(true);
   const [manualStart, setManualStart] = useState(false);
+  const [canProceed, setCanProceed] = useState(true); // Can always proceed by default
 
   useEffect(() => {
     if (!user) return;
@@ -130,6 +131,36 @@ export function Tutorial() {
 
     return () => window.removeEventListener('storage', handleStorageChange);
   }, [user]);
+
+  // Check if user can proceed based on current step
+  useEffect(() => {
+    const step = TUTORIAL_STEPS[currentStep];
+
+    if (step.id === "composer") {
+      // Check if composer has text
+      const checkComposer = () => {
+        const composer = document.querySelector('.composer-highlight textarea');
+        if (composer && (composer as HTMLTextAreaElement).value.trim().length > 0) {
+          setCanProceed(true);
+        } else {
+          setCanProceed(false);
+        }
+      };
+
+      // Check immediately
+      checkComposer();
+
+      // Listen for input changes
+      const composer = document.querySelector('.composer-highlight textarea');
+      if (composer) {
+        composer.addEventListener('input', checkComposer);
+        return () => composer.removeEventListener('input', checkComposer);
+      }
+    } else {
+      // All other steps can proceed immediately
+      setCanProceed(true);
+    }
+  }, [currentStep, isActive]);
 
   const nextStep = () => {
     if (currentStep < TUTORIAL_STEPS.length - 1) {
@@ -225,13 +256,13 @@ export function Tutorial() {
 
   return (
     <>
-      {/* Backdrop overlay */}
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in" />
+      {/* Semi-transparent backdrop - NOT blurred */}
+      <div className="fixed inset-0 bg-black/40 z-40 animate-in fade-in pointer-events-none" />
 
-      {/* Highlight target element */}
+      {/* Highlight target element with spotlight effect */}
       {step.target && (
         <div
-          className="fixed z-40 pointer-events-none animate-pulse"
+          className="fixed z-50 pointer-events-none"
           style={{
             ...(() => {
               const element = document.querySelector(step.target);
@@ -242,9 +273,10 @@ export function Tutorial() {
                 left: `${rect.left - 4}px`,
                 width: `${rect.width + 8}px`,
                 height: `${rect.height + 8}px`,
-                border: "4px solid var(--primary)",
+                border: "3px solid var(--primary)",
                 borderRadius: "4px",
-                boxShadow: "0 0 0 9999px rgba(0,0,0,0.6)"
+                boxShadow: "0 0 0 4px rgba(var(--primary-rgb), 0.2), 0 0 0 9999px rgba(0,0,0,0.4)",
+                animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
               };
             })()
           }}
@@ -300,6 +332,13 @@ export function Tutorial() {
             </div>
 
             <div className="flex gap-2">
+              <button
+                onClick={skipTutorial}
+                className="brutal-btn brutal-btn-ghost text-xs"
+              >
+                Skip Tutorial
+              </button>
+
               {currentStep > 0 && (
                 <button
                   onClick={() => setCurrentStep(currentStep - 1)}
@@ -311,7 +350,8 @@ export function Tutorial() {
 
               <button
                 onClick={nextStep}
-                className="brutal-btn text-xs flex items-center gap-2"
+                disabled={!canProceed}
+                className="brutal-btn text-xs flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {currentStep === TUTORIAL_STEPS.length - 1 ? (
                   <>
@@ -319,7 +359,7 @@ export function Tutorial() {
                   </>
                 ) : (
                   <>
-                    Next <ArrowRight className="w-4 h-4" />
+                    {canProceed ? 'Next' : 'Complete action'} <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
