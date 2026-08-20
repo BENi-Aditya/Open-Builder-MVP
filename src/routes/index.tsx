@@ -46,7 +46,7 @@ function FeedPage() {
     if (followingIds) projQ.in("owner_id", followingIds);
     projQ.order(tab === "trending" ? "like_count" : "created_at", { ascending: false });
 
-    const logQ = supabase.from("build_logs").select("id, body, image_url, created_at, project_id, project:projects(id, title), user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").order("created_at", { ascending: false }).limit(15);
+    const logQ = supabase.from("build_logs").select("id, body, image_url, created_at, project_id, like_count, comment_count, project:projects(id, title), user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").order("created_at", { ascending: false }).limit(15);
     if (followingIds) logQ.in("user_id", followingIds);
 
     const collabQ = supabase.from("collab_posts").select("id, title, description, role_needed, tech_tags, is_open, created_at, user:profiles!collab_posts_user_id_fkey(id, username, display_name, avatar_url), project:projects(id, title)").eq("is_open", true).order("created_at", { ascending: false }).limit(8);
