@@ -16,6 +16,7 @@ export type BuildLog = {
   project_id: string | null;
   like_count?: number;
   comment_count?: number;
+  media?: Array<{ id: string; url: string; media_type: string; position: number }>;
   project?: { id: string; title: string } | null;
   user: { id: string; username: string; display_name: string | null; avatar_url: string | null };
 };
@@ -158,9 +159,31 @@ export function BuildLogCard({ log: initialLog }: { log: BuildLog }) {
           )}
         </div>
         <p className="mt-2 text-sm whitespace-pre-wrap">{log.body}</p>
-        {log.image_url && (
-          <img src={log.image_url} alt="" className="mt-3 w-full max-w-full border-2 border-white/20 object-cover max-h-96" />
-        )}
+
+        {/* Display images with original aspect ratio */}
+        {(log.media && log.media.length > 0) ? (
+          <div className={`mt-3 grid gap-2 ${log.media.length === 1 ? 'grid-cols-1' : log.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
+            {log.media.sort((a, b) => a.position - b.position).map((m) => (
+              <div key={m.id} className="border-2 border-white/20 overflow-hidden">
+                <img
+                  src={m.url}
+                  alt=""
+                  className="w-full h-auto object-contain bg-black/5"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        ) : log.image_url ? (
+          <div className="mt-3 border-2 border-white/20 overflow-hidden">
+            <img
+              src={log.image_url}
+              alt=""
+              className="w-full h-auto object-contain bg-black/5"
+              loading="lazy"
+            />
+          </div>
+        ) : null}
 
         <div className="flex items-center gap-3 mt-3">
           <button

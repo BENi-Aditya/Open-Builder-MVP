@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { Avatar } from "@/components/AppShell";
-import { Image as ImageIcon, Zap, Send, Link2 } from "lucide-react";
+import { Image as ImageIcon, Zap, Send, Link2, X } from "lucide-react";
 
 export function Composer({ onPosted }: { onPosted?: () => void }) {
   const { user, profile } = useAuth();
   const [body, setBody] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [projectId, setProjectId] = useState("");
   const [projects, setProjects] = useState<Array<{ id: string; title: string }>>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -29,16 +29,40 @@ export function Composer({ onPosted }: { onPosted?: () => void }) {
     if (!user || !body.trim()) return;
     setSubmitting(true);
     try {
+      // Upload first image to image_url for backward compatibility
       let image_url: string | null = null;
-      if (file) image_url = await uploadMedia(file, user.id, "logs");
-      const { error } = await supabase.from("build_logs").insert({
+      if (files.length > 0) {
+        image_url = await uploadMedia(files[0], user.id, "logs");
+      }
+
+      // Insert the build log
+      const { data: log, error } = await supabase.from("build_logs").insert({
         user_id: user.id,
         project_id: projectId || null,
         body: body.trim(),
         image_url,
-      });
+      }).select().single();
+
       if (error) throw error;
-      setBody(""); setFile(null); setProjectId("");
+
+      // Upload additional images to build_log_media
+      if (log && files.length > 0) {
+        const mediaUploads = await Promise.all(
+          files.map(async (file, index) => {
+            const url = await uploadMedia(file, user.id, "logs");
+            return {
+              build_log_id: log.id,
+              url,
+              media_type: "image",
+              position: index,
+            };
+          })
+        );
+
+        await supabase.from("build_log_media").insert(mediaUploads);
+      }
+
+      setBody(""); setFiles([]); setProjectId("");
       toast.success("Build log shipped");
       onPosted?.();
     } catch (e) {
@@ -46,6 +70,16 @@ export function Composer({ onPosted }: { onPosted?: () => void }) {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = Array.from(e.target.files || []);
+    setFiles(prev => [...prev, ...selectedFiles].slice(0, 10)); // Max 10 images
+    e.target.value = ""; // Reset input
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   if (!user || !profile) return null;
@@ -72,11 +106,28 @@ export function Composer({ onPosted }: { onPosted?: () => void }) {
           className="brutal-input min-h-[70px] resize-y"
           maxLength={1000}
         />
-        {file && <div className="text-xs font-mono mt-2 text-[var(--tangerine)]">📎 {file.name}</div>}
+        {files.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-2">
+            {files.map((file, index) => (
+              <div key={index} className="relative group">
+                <div className="text-xs font-mono px-2 py-1 bg-black/20 border border-white/10 text-[var(--tangerine)] flex items-center gap-2">
+                  📎 {file.name.length > 20 ? file.name.slice(0, 20) + '...' : file.name}
+                  <button
+                    onClick={() => removeFile(index)}
+                    className="hover:text-destructive transition-colors"
+                    type="button"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
         <div className="flex items-center justify-between mt-2">
           <label className="brutal-btn brutal-btn-ghost text-[10px] py-1.5 cursor-pointer">
-            <ImageIcon className="w-3 h-3" /> Image
-            <input type="file" accept="image/*" hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <ImageIcon className="w-3 h-3" /> {files.length > 0 ? `Add more (${files.length}/10)` : 'Add images'}
+            <input type="file" accept="image/*" multiple hidden onChange={handleFileSelect} disabled={files.length >= 10} />
           </label>
           <button onClick={submit} disabled={submitting || !body.trim()} className="brutal-btn text-[10px] py-1.5 disabled:opacity-50">
             <Zap className="w-3 h-3" /> {submitting ? "Shipping…" : "Post log"} <Send className="w-3 h-3" />

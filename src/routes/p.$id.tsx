@@ -27,11 +27,11 @@ function ProjectPage() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from("projects").select("*, owner:profiles!projects_owner_id_fkey(id, username, display_name, avatar_url, bio)").eq("id", id).maybeSingle();
+    const { data } = await supabase.from("projects").select("*, owner:profiles!projects_owner_id_fkey(id, username, display_name, avatar_url, bio), media:project_media(id, url, media_type, position)").eq("id", id).maybeSingle();
     setProject(data);
     const [{ data: cm }, { data: lg }] = await Promise.all([
       supabase.from("comments").select("id, body, created_at, user_id, like_count, user:profiles!comments_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
-      supabase.from("build_logs").select("id, body, image_url, created_at, user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
+      supabase.from("build_logs").select("id, body, image_url, created_at, media:build_log_media(id, url, media_type, position), user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("project_id", id).order("created_at", { ascending: false }),
     ]);
     setComments(cm ?? []);
     setLogs(lg ?? []);
@@ -165,6 +165,25 @@ function ProjectPage() {
 
         <div className="grid lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-6">
+            {/* Project Media Gallery */}
+            {project.media && project.media.length > 0 && (
+              <section className="brutal-card-flat p-6">
+                <h2 className="font-display font-bold text-xl mb-4">Gallery</h2>
+                <div className={`grid gap-3 ${project.media.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                  {project.media.sort((a: any, b: any) => a.position - b.position).map((m: any) => (
+                    <div key={m.id} className="border-2 border-white/20 overflow-hidden bg-black/5">
+                      <img
+                        src={m.url}
+                        alt=""
+                        className="w-full h-auto object-contain"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {project.description && (
               <section className="brutal-card-flat p-6">
                 <h2 className="font-display font-bold text-xl mb-3">README</h2>
@@ -192,7 +211,19 @@ function ProjectPage() {
                     <li key={l.id} className="border-l-4 border-[var(--tangerine)] pl-4 py-1">
                       <div className="text-[10px] font-mono uppercase text-muted-foreground">{formatDistanceToNow(new Date(l.created_at), { addSuffix: true })}</div>
                       <p className="text-sm whitespace-pre-wrap mt-1">{l.body}</p>
-                      {l.image_url && <img src={l.image_url} alt="" className="mt-2 w-full max-w-full border-2 border-white/20 object-cover max-h-72" />}
+                      {(l.media && l.media.length > 0) ? (
+                        <div className={`mt-2 grid gap-2 ${l.media.length === 1 ? 'grid-cols-1' : l.media.length === 2 ? 'grid-cols-2' : 'grid-cols-2 md:grid-cols-3'}`}>
+                          {l.media.sort((a, b) => a.position - b.position).map((m) => (
+                            <div key={m.id} className="border-2 border-white/20 overflow-hidden bg-black/5">
+                              <img src={m.url} alt="" className="w-full h-auto object-contain" loading="lazy" />
+                            </div>
+                          ))}
+                        </div>
+                      ) : l.image_url ? (
+                        <div className="mt-2 border-2 border-white/20 overflow-hidden bg-black/5">
+                          <img src={l.image_url} alt="" className="w-full h-auto object-contain" loading="lazy" />
+                        </div>
+                      ) : null}
                     </li>
                   ))}
                 </ol>
