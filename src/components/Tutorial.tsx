@@ -165,6 +165,7 @@ export function Tutorial() {
   const nextStep = () => {
     if (currentStep < TUTORIAL_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
+      setCanProceed(true); // Reset for next step
 
       // Navigate if step has a route
       const step = TUTORIAL_STEPS[currentStep + 1];
@@ -176,7 +177,18 @@ export function Tutorial() {
     }
   };
 
+  const skipCurrentStep = () => {
+    // Just skip to next step, don't exit tutorial
+    if (currentStep < TUTORIAL_STEPS.length - 1) {
+      setCurrentStep(currentStep + 1);
+      setCanProceed(true);
+    } else {
+      completeTutorial();
+    }
+  };
+
   const skipTutorial = () => {
+    // Exit entire tutorial
     completeTutorial();
   };
 
@@ -256,36 +268,58 @@ export function Tutorial() {
 
   return (
     <>
-      {/* Semi-transparent backdrop - NOT blurred */}
-      <div className="fixed inset-0 bg-black/40 z-40 animate-in fade-in pointer-events-none" />
+      {/* Dark backdrop - everything except highlighted element */}
+      <div className="fixed inset-0 bg-black/70 z-40 animate-in fade-in pointer-events-none" />
 
-      {/* Highlight target element with spotlight effect */}
+      {/* Spotlight cutout for highlighted element */}
       {step.target && (
-        <div
-          className="fixed z-50 pointer-events-none"
-          style={{
-            ...(() => {
-              const element = document.querySelector(step.target);
-              if (!element) return {};
-              const rect = element.getBoundingClientRect();
-              return {
-                top: `${rect.top - 4}px`,
-                left: `${rect.left - 4}px`,
-                width: `${rect.width + 8}px`,
-                height: `${rect.height + 8}px`,
-                border: "3px solid var(--primary)",
-                borderRadius: "4px",
-                boxShadow: "0 0 0 4px rgba(var(--primary-rgb), 0.2), 0 0 0 9999px rgba(0,0,0,0.4)",
-                animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
-              };
-            })()
-          }}
-        />
+        <>
+          {/* Bright highlight overlay on target */}
+          <div
+            className="fixed z-45 pointer-events-none"
+            style={{
+              ...(() => {
+                const element = document.querySelector(step.target);
+                if (!element) return {};
+                const rect = element.getBoundingClientRect();
+                return {
+                  top: `${rect.top}px`,
+                  left: `${rect.left}px`,
+                  width: `${rect.width}px`,
+                  height: `${rect.height}px`,
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                  boxShadow: '0 0 0 9999px rgba(0,0,0,0.7)',
+                  borderRadius: '4px'
+                };
+              })()
+            }}
+          />
+          {/* Animated border around target */}
+          <div
+            className="fixed z-50 pointer-events-none"
+            style={{
+              ...(() => {
+                const element = document.querySelector(step.target);
+                if (!element) return {};
+                const rect = element.getBoundingClientRect();
+                return {
+                  top: `${rect.top - 4}px`,
+                  left: `${rect.left - 4}px`,
+                  width: `${rect.width + 8}px`,
+                  height: `${rect.height + 8}px`,
+                  border: "3px solid var(--primary)",
+                  borderRadius: "6px",
+                  animation: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+                };
+              })()
+            }}
+          />
+        </>
       )}
 
       {/* Tutorial tooltip */}
       <div
-        className="fixed z-50 w-full max-w-sm px-4 animate-in slide-in-from-bottom"
+        className="fixed z-50 w-full max-w-xl px-4 animate-in slide-in-from-bottom"
         style={{
           ...tooltipPosition,
           ...(window.innerWidth < 640 ? {
@@ -296,9 +330,9 @@ export function Tutorial() {
           } : {})
         }}
       >
-        <div className="brutal-card bg-card p-6 relative">
+        <div className="brutal-card bg-card p-8 relative shadow-2xl">
           {/* Progress bar */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-white/10">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-white/10">
             <div
               className="h-full bg-primary transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -309,40 +343,45 @@ export function Tutorial() {
           <button
             onClick={skipTutorial}
             className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Exit tutorial"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
 
           {/* Content */}
           <div className="pr-8">
-            <h3 className="font-display font-bold text-xl mb-2">{step.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+            <h3 className="font-display font-bold text-2xl mb-3">{step.title}</h3>
+            <p className="text-base text-muted-foreground leading-relaxed mb-4">{step.description}</p>
 
             {step.action && (
-              <div className="mt-3 px-3 py-2 bg-primary/10 border-2 border-primary/30 rounded-none">
-                <p className="text-xs font-mono text-primary">👉 {step.action}</p>
+              <div className="mt-4 px-4 py-3 bg-primary/10 border-2 border-primary/30 rounded-none">
+                <p className="text-sm font-mono text-primary flex items-start gap-2">
+                  <span className="text-lg">→</span>
+                  <span>{step.action}</span>
+                </p>
               </div>
             )}
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between mt-6 pt-4 border-t-2 border-white/10">
-            <div className="text-xs font-mono text-muted-foreground">
-              Step {currentStep + 1} of {TUTORIAL_STEPS.length}
+          <div className="flex items-center justify-between mt-8 pt-6 border-t-2 border-white/10">
+            <div className="flex items-center gap-4">
+              <div className="text-sm font-mono text-muted-foreground">
+                Step {currentStep + 1} of {TUTORIAL_STEPS.length}
+              </div>
+              <button
+                onClick={skipCurrentStep}
+                className="text-sm text-muted-foreground hover:text-foreground underline transition-colors"
+              >
+                Skip this step
+              </button>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={skipTutorial}
-                className="brutal-btn brutal-btn-ghost text-xs"
-              >
-                Skip Tutorial
-              </button>
-
+            <div className="flex gap-3">
               {currentStep > 0 && (
                 <button
                   onClick={() => setCurrentStep(currentStep - 1)}
-                  className="brutal-btn brutal-btn-ghost text-xs"
+                  className="brutal-btn brutal-btn-ghost"
                 >
                   Back
                 </button>
@@ -351,15 +390,17 @@ export function Tutorial() {
               <button
                 onClick={nextStep}
                 disabled={!canProceed}
-                className="brutal-btn text-xs flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="brutal-btn flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center"
               >
                 {currentStep === TUTORIAL_STEPS.length - 1 ? (
                   <>
                     <Check className="w-4 h-4" /> Get Started
                   </>
+                ) : !canProceed ? (
+                  <>Complete Action</>
                 ) : (
                   <>
-                    {canProceed ? 'Next' : 'Complete action'} <ArrowRight className="w-4 h-4" />
+                    Next <ArrowRight className="w-4 h-4" />
                   </>
                 )}
               </button>
