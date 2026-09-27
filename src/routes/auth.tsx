@@ -72,7 +72,8 @@ function AuthPage() {
             style={{ boxShadow: "4px 4px 0 0 #fff" }}
           />
           <div>
-            <div className="font-display font-black text-3xl">OPENBUILDER</div>
+            <div className="font-display font-black text-3xl leading-none">OPENBUILDER</div>
+            <div className="font-display font-black text-xl leading-none text-huddle">× HUDDLE</div>
             <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground mt-1">
               // {mode === "signin" ? "log in to build" : "create your builder identity"}
             </div>

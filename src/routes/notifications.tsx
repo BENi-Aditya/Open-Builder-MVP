@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "@/components/AppShell";
 import { formatDistanceToNow } from "date-fns";
-import { Heart, MessageCircle, UserPlus, Users, Bell, Check, X, MessageSquare } from "lucide-react";
+import { Heart, MessageCircle, UserPlus, Users, Bell, Check, X, MessageSquare, Flame, Ticket } from "lucide-react";
 import { toast } from "sonner";
 import { createNotification } from "@/lib/notifications";
 
@@ -16,7 +16,9 @@ const ICONS: Record<string, any> = {
   follow: UserPlus, 
   collab_request: Users,
   collab_accepted: Check,
-  chat_message: MessageSquare
+  chat_message: MessageSquare,
+  event_registered: Ticket,
+  event_update: Flame,
 };
 
 function NotificationsPage() {
@@ -134,7 +136,8 @@ function NotificationsPage() {
             const isPending = request?.status === 'pending';
             const isCollabRequest = n.type === "collab_request";
 
-            const link = n.type === "chat_message" ? `/chat?id=${n.entity_id}` : n.entity_type === "project" ? `/p/${n.entity_id}` : n.entity_type === "profile" ? `/u/${n.actor?.username}` : n.type === "collab_request" ? `/collab` : "/collab";
+            const isHuddle = n.entity_type === "event";
+            const link = n.type === "chat_message" ? `/chat?id=${n.entity_id}` : isHuddle ? `/huddle/${n.entity_id}` : n.entity_type === "project" ? `/p/${n.entity_id}` : n.entity_type === "profile" ? `/u/${n.actor?.username}` : n.type === "collab_request" ? `/collab` : "/collab";
             
             return (
               <div
@@ -142,7 +145,9 @@ function NotificationsPage() {
                 className={`brutal-card-flat p-4 flex items-center gap-4 hover:border-white transition-colors group relative overflow-hidden ${
                   isCollabRequest
                     ? "border-[var(--tangerine)] bg-[color:color-mix(in_oklab,var(--tangerine)_12%,var(--card))]"
-                    : "bg-card/50"
+                    : isHuddle
+                      ? "huddle-theme border-primary/50 bg-[color:color-mix(in_oklab,var(--huddle)_10%,var(--card))]"
+                      : "bg-card/50"
                 }`}
               >
                 {/* Background Accent */}
@@ -213,6 +218,8 @@ function labelFor(type: string) {
     collab_request: "wants to collab", 
     collab_accepted: "accepted your request", 
     build_log: "posted a build log",
-    chat_message: "sent you a message"
+    chat_message: "sent you a message",
+    event_registered: "confirmed your spot at a huddle",
+    event_update: "updated a huddle you joined",
   }[type] ?? type;
 }

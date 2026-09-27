@@ -7,7 +7,9 @@ export type AppNotificationType =
   | "collab_request"
   | "collab_accepted"
   | "build_log"
-  | "chat_message";
+  | "chat_message"
+  | "event_registered"
+  | "event_update";
 
 type CreateNotificationInput = {
   userId: string;

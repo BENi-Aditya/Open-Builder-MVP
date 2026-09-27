@@ -186,20 +186,35 @@ export type Database = {
         Row: {
           collab_request_id: string | null
           created_at: string
+          event_id: string | null
           id: string
+          kind: string
+          title: string | null
           updated_at: string
+          user_high: string | null
+          user_low: string | null
         }
         Insert: {
           collab_request_id?: string | null
           created_at?: string
+          event_id?: string | null
           id?: string
+          kind?: string
+          title?: string | null
           updated_at?: string
+          user_high?: string | null
+          user_low?: string | null
         }
         Update: {
           collab_request_id?: string | null
           created_at?: string
+          event_id?: string | null
           id?: string
+          kind?: string
+          title?: string | null
           updated_at?: string
+          user_high?: string | null
+          user_low?: string | null
         }
         Relationships: [
           {
@@ -207,6 +222,266 @@ export type Database = {
             columns: ["collab_request_id"]
             isOneToOne: false
             referencedRelation: "collab_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chats_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string
+          capacity: number | null
+          chat_id: string | null
+          city: string
+          country: string
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          ends_at: string
+          id: string
+          latitude: number | null
+          longitude: number | null
+          maps_url: string | null
+          organizer_id: string
+          registration_count: number
+          registration_deadline: string | null
+          registration_enabled: boolean
+          starts_at: string
+          state: string | null
+          status: Database["public"]["Enums"]["event_status"]
+          tagline: string | null
+          timezone: string
+          title: string
+          updated_at: string
+          venue_name: string
+        }
+        Insert: {
+          address: string
+          capacity?: number | null
+          chat_id?: string | null
+          city: string
+          country?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          maps_url?: string | null
+          organizer_id: string
+          registration_count?: number
+          registration_deadline?: string | null
+          registration_enabled?: boolean
+          starts_at: string
+          state?: string | null
+          status?: Database["public"]["Enums"]["event_status"]
+          tagline?: string | null
+          timezone?: string
+          title: string
+          updated_at?: string
+          venue_name: string
+        }
+        Update: {
+          address?: string
+          capacity?: number | null
+          chat_id?: string | null
+          city?: string
+          country?: string
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          ends_at?: string
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          maps_url?: string | null
+          organizer_id?: string
+          registration_count?: number
+          registration_deadline?: string | null
+          registration_enabled?: boolean
+          starts_at?: string
+          state?: string | null
+          status?: Database["public"]["Enums"]["event_status"]
+          tagline?: string | null
+          timezone?: string
+          title?: string
+          updated_at?: string
+          venue_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_images: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          image_url: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          image_url: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          image_url?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_images_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_guests: {
+        Row: {
+          created_at: string
+          designation: string | null
+          event_id: string
+          id: string
+          image_url: string | null
+          name: string
+          organization: string | null
+          role: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          designation?: string | null
+          event_id: string
+          id?: string
+          image_url?: string | null
+          name: string
+          organization?: string | null
+          role?: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          designation?: string | null
+          event_id?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          organization?: string | null
+          role?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_guests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_registrations: {
+        Row: {
+          event_id: string
+          id: string
+          registered_at: string
+          status: Database["public"]["Enums"]["event_registration_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          registered_at?: string
+          status?: Database["public"]["Enums"]["event_registration_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          registered_at?: string
+          status?: Database["public"]["Enums"]["event_registration_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_registrations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_roles_granted_by_fkey"
+            columns: ["granted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_roles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -702,9 +977,51 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_collab_request: {
+        Args: { request_id: string }
+        Returns: string
+      }
+      can_manage_event: {
+        Args: { check_event_id: string }
+        Returns: boolean
+      }
+      can_view_event: {
+        Args: { check_event_id: string }
+        Returns: boolean
+      }
+      cancel_event_registration: {
+        Args: { p_event_id: string }
+        Returns: undefined
+      }
+      check_chat_access: {
+        Args: { check_chat_id: string }
+        Returns: boolean
+      }
+      get_or_create_direct_chat: {
+        Args: { other_user_id: string }
+        Returns: string
+      }
+      has_role: {
+        Args: { check_user_id: string; check_role: Database["public"]["Enums"]["app_role"] }
+        Returns: boolean
+      }
+      is_huddle_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      is_huddle_organizer: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      register_for_event: {
+        Args: { p_event_id: string }
+        Returns: Database["public"]["Tables"]["event_registrations"]["Row"]
+      }
     }
     Enums: {
+      app_role: "user" | "huddle_organizer" | "huddle_admin" | "openbuilder_admin"
+      event_registration_status: "registered" | "cancelled"
+      event_status: "draft" | "published" | "cancelled"
       collab_request_status: "pending" | "accepted" | "rejected"
       collab_status:
         | "not_looking"
@@ -721,6 +1038,8 @@ export type Database = {
         | "collab_accepted"
         | "build_log"
         | "chat_message"
+        | "event_registered"
+        | "event_update"
       project_visibility: "public" | "unlisted" | "private"
     }
     CompositeTypes: {

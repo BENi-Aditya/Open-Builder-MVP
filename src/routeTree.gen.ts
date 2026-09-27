@@ -19,8 +19,16 @@ import { Route as CollabRouteImport } from './routes/collab'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HuddleIndexRouteImport } from './routes/huddle.index'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as PIdRouteImport } from './routes/p.$id'
+import { Route as HuddleManageRouteImport } from './routes/huddle.manage'
+import { Route as HuddleDevRouteImport } from './routes/huddle.dev'
+import { Route as HuddleCreateRouteImport } from './routes/huddle.create'
+import { Route as HuddleEventIdRouteImport } from './routes/huddle.$eventId'
+import { Route as HuddleEventIdEditRouteImport } from './routes/huddle.$eventId_.edit'
+import { Route as HuddleEventIdChatRouteImport } from './routes/huddle.$eventId_.chat'
+import { Route as HuddleEventIdAttendeesRouteImport } from './routes/huddle.$eventId_.attendees'
 
 const SettingsRoute = SettingsRouteImport.update({
   id: '/settings',
@@ -72,6 +80,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const HuddleIndexRoute = HuddleIndexRouteImport.update({
+  id: '/huddle/',
+  path: '/huddle/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UUsernameRoute = UUsernameRouteImport.update({
   id: '/u/$username',
   path: '/u/$username',
@@ -80,6 +93,41 @@ const UUsernameRoute = UUsernameRouteImport.update({
 const PIdRoute = PIdRouteImport.update({
   id: '/p/$id',
   path: '/p/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleManageRoute = HuddleManageRouteImport.update({
+  id: '/huddle/manage',
+  path: '/huddle/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleDevRoute = HuddleDevRouteImport.update({
+  id: '/huddle/dev',
+  path: '/huddle/dev',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleCreateRoute = HuddleCreateRouteImport.update({
+  id: '/huddle/create',
+  path: '/huddle/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleEventIdRoute = HuddleEventIdRouteImport.update({
+  id: '/huddle/$eventId',
+  path: '/huddle/$eventId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleEventIdEditRoute = HuddleEventIdEditRouteImport.update({
+  id: '/huddle/$eventId_/edit',
+  path: '/huddle/$eventId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleEventIdChatRoute = HuddleEventIdChatRouteImport.update({
+  id: '/huddle/$eventId_/chat',
+  path: '/huddle/$eventId/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HuddleEventIdAttendeesRoute = HuddleEventIdAttendeesRouteImport.update({
+  id: '/huddle/$eventId_/attendees',
+  path: '/huddle/$eventId/attendees',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -94,8 +142,16 @@ export interface FileRoutesByFullPath {
   '/saved': typeof SavedRoute
   '/seed': typeof SeedRoute
   '/settings': typeof SettingsRoute
+  '/huddle/$eventId': typeof HuddleEventIdRoute
+  '/huddle/create': typeof HuddleCreateRoute
+  '/huddle/dev': typeof HuddleDevRoute
+  '/huddle/manage': typeof HuddleManageRoute
   '/p/$id': typeof PIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/huddle/': typeof HuddleIndexRoute
+  '/huddle/$eventId/attendees': typeof HuddleEventIdAttendeesRoute
+  '/huddle/$eventId/chat': typeof HuddleEventIdChatRoute
+  '/huddle/$eventId/edit': typeof HuddleEventIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -108,8 +164,16 @@ export interface FileRoutesByTo {
   '/saved': typeof SavedRoute
   '/seed': typeof SeedRoute
   '/settings': typeof SettingsRoute
+  '/huddle/$eventId': typeof HuddleEventIdRoute
+  '/huddle/create': typeof HuddleCreateRoute
+  '/huddle/dev': typeof HuddleDevRoute
+  '/huddle/manage': typeof HuddleManageRoute
   '/p/$id': typeof PIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/huddle': typeof HuddleIndexRoute
+  '/huddle/$eventId/attendees': typeof HuddleEventIdAttendeesRoute
+  '/huddle/$eventId/chat': typeof HuddleEventIdChatRoute
+  '/huddle/$eventId/edit': typeof HuddleEventIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -123,8 +187,16 @@ export interface FileRoutesById {
   '/saved': typeof SavedRoute
   '/seed': typeof SeedRoute
   '/settings': typeof SettingsRoute
+  '/huddle/$eventId': typeof HuddleEventIdRoute
+  '/huddle/create': typeof HuddleCreateRoute
+  '/huddle/dev': typeof HuddleDevRoute
+  '/huddle/manage': typeof HuddleManageRoute
   '/p/$id': typeof PIdRoute
   '/u/$username': typeof UUsernameRoute
+  '/huddle/': typeof HuddleIndexRoute
+  '/huddle/$eventId_/attendees': typeof HuddleEventIdAttendeesRoute
+  '/huddle/$eventId_/chat': typeof HuddleEventIdChatRoute
+  '/huddle/$eventId_/edit': typeof HuddleEventIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,8 +211,16 @@ export interface FileRouteTypes {
     | '/saved'
     | '/seed'
     | '/settings'
+    | '/huddle/$eventId'
+    | '/huddle/create'
+    | '/huddle/dev'
+    | '/huddle/manage'
     | '/p/$id'
     | '/u/$username'
+    | '/huddle/'
+    | '/huddle/$eventId/attendees'
+    | '/huddle/$eventId/chat'
+    | '/huddle/$eventId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -153,8 +233,16 @@ export interface FileRouteTypes {
     | '/saved'
     | '/seed'
     | '/settings'
+    | '/huddle/$eventId'
+    | '/huddle/create'
+    | '/huddle/dev'
+    | '/huddle/manage'
     | '/p/$id'
     | '/u/$username'
+    | '/huddle'
+    | '/huddle/$eventId/attendees'
+    | '/huddle/$eventId/chat'
+    | '/huddle/$eventId/edit'
   id:
     | '__root__'
     | '/'
@@ -167,8 +255,16 @@ export interface FileRouteTypes {
     | '/saved'
     | '/seed'
     | '/settings'
+    | '/huddle/$eventId'
+    | '/huddle/create'
+    | '/huddle/dev'
+    | '/huddle/manage'
     | '/p/$id'
     | '/u/$username'
+    | '/huddle/'
+    | '/huddle/$eventId_/attendees'
+    | '/huddle/$eventId_/chat'
+    | '/huddle/$eventId_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -182,8 +278,16 @@ export interface RootRouteChildren {
   SavedRoute: typeof SavedRoute
   SeedRoute: typeof SeedRoute
   SettingsRoute: typeof SettingsRoute
+  HuddleEventIdRoute: typeof HuddleEventIdRoute
+  HuddleCreateRoute: typeof HuddleCreateRoute
+  HuddleDevRoute: typeof HuddleDevRoute
+  HuddleManageRoute: typeof HuddleManageRoute
   PIdRoute: typeof PIdRoute
   UUsernameRoute: typeof UUsernameRoute
+  HuddleIndexRoute: typeof HuddleIndexRoute
+  HuddleEventIdAttendeesRoute: typeof HuddleEventIdAttendeesRoute
+  HuddleEventIdChatRoute: typeof HuddleEventIdChatRoute
+  HuddleEventIdEditRoute: typeof HuddleEventIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -258,6 +362,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/huddle/': {
+      id: '/huddle/'
+      path: '/huddle'
+      fullPath: '/huddle/'
+      preLoaderRoute: typeof HuddleIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/u/$username': {
       id: '/u/$username'
       path: '/u/$username'
@@ -270,6 +381,55 @@ declare module '@tanstack/react-router' {
       path: '/p/$id'
       fullPath: '/p/$id'
       preLoaderRoute: typeof PIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/manage': {
+      id: '/huddle/manage'
+      path: '/huddle/manage'
+      fullPath: '/huddle/manage'
+      preLoaderRoute: typeof HuddleManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/dev': {
+      id: '/huddle/dev'
+      path: '/huddle/dev'
+      fullPath: '/huddle/dev'
+      preLoaderRoute: typeof HuddleDevRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/create': {
+      id: '/huddle/create'
+      path: '/huddle/create'
+      fullPath: '/huddle/create'
+      preLoaderRoute: typeof HuddleCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/$eventId': {
+      id: '/huddle/$eventId'
+      path: '/huddle/$eventId'
+      fullPath: '/huddle/$eventId'
+      preLoaderRoute: typeof HuddleEventIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/$eventId_/edit': {
+      id: '/huddle/$eventId_/edit'
+      path: '/huddle/$eventId/edit'
+      fullPath: '/huddle/$eventId/edit'
+      preLoaderRoute: typeof HuddleEventIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/$eventId_/chat': {
+      id: '/huddle/$eventId_/chat'
+      path: '/huddle/$eventId/chat'
+      fullPath: '/huddle/$eventId/chat'
+      preLoaderRoute: typeof HuddleEventIdChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/huddle/$eventId_/attendees': {
+      id: '/huddle/$eventId_/attendees'
+      path: '/huddle/$eventId/attendees'
+      fullPath: '/huddle/$eventId/attendees'
+      preLoaderRoute: typeof HuddleEventIdAttendeesRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -286,8 +446,16 @@ const rootRouteChildren: RootRouteChildren = {
   SavedRoute: SavedRoute,
   SeedRoute: SeedRoute,
   SettingsRoute: SettingsRoute,
+  HuddleEventIdRoute: HuddleEventIdRoute,
+  HuddleCreateRoute: HuddleCreateRoute,
+  HuddleDevRoute: HuddleDevRoute,
+  HuddleManageRoute: HuddleManageRoute,
   PIdRoute: PIdRoute,
   UUsernameRoute: UUsernameRoute,
+  HuddleIndexRoute: HuddleIndexRoute,
+  HuddleEventIdAttendeesRoute: HuddleEventIdAttendeesRoute,
+  HuddleEventIdChatRoute: HuddleEventIdChatRoute,
+  HuddleEventIdEditRoute: HuddleEventIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
