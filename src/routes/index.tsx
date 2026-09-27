@@ -6,6 +6,7 @@ import { ProjectCard, type FeedProject } from "@/components/ProjectCard";
 import { BuildLogCard, type BuildLog } from "@/components/BuildLogCard";
 import { CollabCard, type CollabPost } from "@/components/CollabCard";
 import { Composer } from "@/components/Composer";
+import { HuddleSpotlight } from "@/components/huddle/HuddleSpotlight";
 import { toast } from "sonner";
 import { Flame, Sparkles, Users, X, Rocket } from "lucide-react";
 
@@ -152,6 +153,8 @@ function FeedPage() {
           )}
         </div>
       </header>
+
+      <HuddleSpotlight />
 
       {user && (
         <section className="mb-4 space-y-3">

@@ -4,9 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "@/components/AppShell";
 import { FollowButton } from "@/components/FollowButton";
+import { MessageButton } from "@/components/MessageButton";
 import { ProjectCard, type FeedProject } from "@/components/ProjectCard";
 import { BuildLogCard, type BuildLog } from "@/components/BuildLogCard";
-import { toast } from "sonner";
+import { EventCard } from "@/components/huddle/EventCard";
+import { EVENT_CARD_SELECT, type HuddleEvent } from "@/lib/huddle";
 import { Edit2, MapPin } from "lucide-react";
 
 export const Route = createFileRoute("/u/$username")({ component: ProfilePage });
@@ -18,7 +20,8 @@ function ProfilePage() {
   const [projects, setProjects] = useState<FeedProject[]>([]);
   const [logs, setLogs] = useState<BuildLog[]>([]);
   const [counts, setCounts] = useState({ followers: 0, following: 0 });
-  const [tab, setTab] = useState<"projects" | "logs">("projects");
+  const [huddles, setHuddles] = useState<HuddleEvent[]>([]);
+  const [tab, setTab] = useState<"projects" | "logs" | "huddles">("projects");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,15 +30,17 @@ function ProfilePage() {
       const { data: p } = await supabase.from("profiles").select("*").eq("username", username).maybeSingle();
       if (!p) { setLoading(false); return; }
       setProfile(p);
-      const [{ data: pr }, { data: lg }, { count: fc }, { count: fgc }] = await Promise.all([
+      const [{ data: pr }, { data: lg }, { count: fc }, { count: fgc }, { data: hd }] = await Promise.all([
         supabase.from("projects").select("id, title, slug, tagline, cover_url, category, tech_stack, like_count, comment_count, github_url, demo_url, created_at, owner:profiles!projects_owner_id_fkey(id, username, display_name, avatar_url)").eq("owner_id", p.id).eq("visibility", "public").order("created_at", { ascending: false }),
         supabase.from("build_logs").select("id, body, image_url, created_at, project_id, project:projects(id, title), media:build_log_media(id, url, media_type, position), user:profiles!build_logs_user_id_fkey(id, username, display_name, avatar_url)").eq("user_id", p.id).order("created_at", { ascending: false }).limit(30),
         supabase.from("follows").select("follower_id", { count: "exact", head: true }).eq("following_id", p.id),
         supabase.from("follows").select("following_id", { count: "exact", head: true }).eq("follower_id", p.id),
+        supabase.from("event_registrations").select(`event:events(${EVENT_CARD_SELECT})`).eq("user_id", p.id).eq("status", "registered").order("registered_at", { ascending: false }).limit(24),
       ]);
       setProjects((pr ?? []) as unknown as FeedProject[]);
       setLogs((lg ?? []) as unknown as BuildLog[]);
       setCounts({ followers: fc ?? 0, following: fgc ?? 0 });
+      setHuddles(((hd ?? []) as unknown as { event: HuddleEvent | null }[]).map((r) => r.event).filter(Boolean) as HuddleEvent[]);
       setLoading(false);
     })();
   }, [username]);
@@ -80,7 +85,10 @@ function ProfilePage() {
             {isMe ? (
               <Link to="/settings" className="brutal-btn brutal-btn-ghost text-xs"><Edit2 className="w-3 h-3" /> Edit profile</Link>
             ) : (
-              <FollowButton targetId={profile.id} />
+              <>
+                <MessageButton targetId={profile.id} />
+                <FollowButton targetId={profile.id} />
+              </>
             )}
           </div>
         </div>
@@ -103,17 +111,30 @@ function ProfilePage() {
         )}
 
         <div className="flex gap-1 mt-8 mb-4 border-b-2 border-white/10">
-          {(["projects", "logs"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>{t}</button>
+          {(["projects", "logs", "huddles"] as const).map((t) => (
+            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 font-bold uppercase text-xs tracking-wider border-b-4 ${t === "huddles" ? "huddle-theme" : ""} ${tab === t ? "border-primary text-primary" : "border-transparent text-muted-foreground"}`}>
+              {t}{t === "huddles" && huddles.length > 0 && <span className="ml-1 opacity-70">{huddles.length}</span>}
+            </button>
           ))}
         </div>
 
         {tab === "projects" ? (
           projects.length === 0 ? <p className="text-muted-foreground text-center py-12">No projects yet.</p> :
           <div className="grid md:grid-cols-2 gap-4">{projects.map((p, i) => <ProjectCard key={p.id} project={p} accentSeed={i} />)}</div>
-        ) : (
+        ) : tab === "logs" ? (
           logs.length === 0 ? <p className="text-muted-foreground text-center py-12">No build logs yet.</p> :
           <div className="space-y-3">{logs.map((l) => <BuildLogCard key={l.id} log={l} onDelete={() => window.location.reload()} />)}</div>
+        ) : (
+          <div className="huddle-theme">
+            {huddles.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">{isMe ? "You haven't joined a huddle yet." : "Not attending any huddles yet."}</p>
+                <Link to="/huddle" className="brutal-btn mt-4 text-xs">Discover huddles</Link>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">{huddles.map((e) => <EventCard key={e.id} event={e} />)}</div>
+            )}
+          </div>
         )}
       </div>
     </div>

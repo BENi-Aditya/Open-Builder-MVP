@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
-  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare, User
+  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare, User, Flame
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -12,11 +12,12 @@ import { Tutorial } from "@/components/Tutorial";
 const NAV = [
   { to: "/", label: "Feed", icon: Home },
   { to: "/explore", label: "Explore", icon: Compass },
+  { to: "/huddle", label: "Huddle", icon: Flame, theme: "huddle-theme" },
   { to: "/collab", label: "Collab", icon: Users },
   { to: "/notifications", label: "Inbox", icon: Bell },
   { to: "/chat", label: "Messages", icon: MessageSquare },
   { to: "/saved", label: "Saved", icon: Bookmark },
-];
+] as { to: string; label: string; icon: typeof Home; theme?: string }[];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, profile, signOut } = useAuth();
@@ -71,9 +72,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             className="w-9 h-9 border-2 border-white object-cover"
             style={{ boxShadow: "3px 3px 0 0 #fff" }}
           />
-          <div>
-            <div className="font-display font-black text-lg leading-none">OPENBUILDER</div>
-            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">beta // build publicly</div>
+          <div className="min-w-0">
+            <div className="font-display font-black text-lg leading-none">
+              OPENBUILDER <span className="text-huddle">×</span>
+            </div>
+            <div className="font-display font-black text-lg leading-none text-huddle">HUDDLE</div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-muted-foreground">community × season</div>
           </div>
         </Link>
 
@@ -93,11 +97,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               <Link
                 key={n.to}
                 to={n.to}
-                className={`flex items-center justify-between px-3 py-2 border-2 ${className} ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent hover:border-white/30"}`}
+                className={`flex items-center justify-between px-3 py-2 border-2 ${className} ${n.theme ?? ""} ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent hover:border-white/30"}`}
                 style={active ? { boxShadow: "3px 3px 0 0 #fff" } : {}}
               >
                 <span className="flex items-center gap-3 font-bold uppercase text-xs tracking-wider">
-                  <n.icon className="w-4 h-4" /> {n.label}
+                  <n.icon className={`w-4 h-4 ${n.theme && !active ? "text-huddle" : ""}`} /> {n.label}
+                  {n.theme && !active && <span className="pill border-huddle/60 px-1.5 py-0 text-[8px] text-huddle">season</span>}
                 </span>
                 {n.to === "/notifications" && unread > 0 && (
                   <span className="pill bg-destructive text-white border-white">{unread}</span>
@@ -138,25 +143,26 @@ export function AppShell({ children }: { children: ReactNode }) {
       {user && <Tutorial />}
 
       {/* mobile bottom bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
-        {[
+      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-7 border-t-2 border-white bg-card/95 px-0.5 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
+        {([
           { to: "/", label: "Feed", icon: Home },
           { to: "/explore", label: "Explore", icon: Compass },
+          { to: "/huddle", label: "Huddle", icon: Flame, theme: "huddle-theme" },
           { to: "/collab", label: "Collab", icon: Users },
           { to: "/notifications", label: "Inbox", icon: Bell },
-          { to: "/chat", label: "Messages", icon: MessageSquare },
+          { to: "/chat", label: "Chat", icon: MessageSquare },
           profile
             ? { to: `/u/${profile.username}`, label: "Profile", icon: User }
             : { to: "/auth", label: "Profile", icon: User },
-        ].map((n) => {
+        ] as { to: string; label: string; icon: typeof Home; theme?: string }[]).map((n) => {
           const active = loc.pathname === n.to || (n.to !== "/" && loc.pathname.startsWith(n.to));
           return (
             <Link
               key={n.to}
               to={n.to}
-              className={`flex min-h-14 flex-col items-center justify-center rounded-none border px-1 py-1 text-[9px] font-bold uppercase tracking-tight ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent text-muted-foreground"}`}
+              className={`flex min-h-14 flex-col items-center justify-center rounded-none border px-0.5 py-1 text-[9px] font-bold uppercase tracking-tight ${n.theme ?? ""} ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent text-muted-foreground"}`}
             >
-              <n.icon className="mb-0.5 h-4 w-4" />
+              <n.icon className={`mb-0.5 h-4 w-4 ${n.theme && !active ? "text-huddle" : ""}`} />
               {n.label}
             </Link>
           );

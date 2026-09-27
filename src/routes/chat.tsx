@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Avatar } from "@/components/AppShell";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { formatDistanceToNow } from "date-fns";
-import { Send, ArrowLeft, MessageSquare, Paperclip, X, Reply, SmilePlus } from "lucide-react";
+import { Send, ArrowLeft, MessageSquare, Paperclip, X, Reply, SmilePlus, Flame, Users, User } from "lucide-react";
 import { toast } from "sonner";
 import { uploadMedia } from "@/lib/upload";
 import { createNotification } from "@/lib/notifications";
@@ -40,6 +40,9 @@ function ChatPage() {
         chat:chats (
           id,
           updated_at,
+          kind,
+          title,
+          event_id,
           collab_request:collab_requests!chats_collab_request_id_fkey (
             id,
             post:collab_posts (title)
@@ -57,17 +60,29 @@ function ChatPage() {
 
     if (error) return toast.error(error.message);
 
-    // For each chat, we need the OTHER participant
-    const chatsWithOther = await Promise.all((data || []).map(async (item: any) => {
+    // Direct chats need the OTHER participant; event group chats need the event + member count.
+    const chatsWithOther = await Promise.all((data || []).filter((item: any) => item.chat).map(async (item: any) => {
+      if (item.chat.kind === "event") {
+        const [{ data: ev }, { count }] = await Promise.all([
+          item.chat.event_id
+            ? supabase.from("events").select("id, title, cover_image_url, city, starts_at, status").eq("id", item.chat.event_id).maybeSingle()
+            : Promise.resolve({ data: null }),
+          supabase.from("chat_participants").select("user_id", { count: "exact", head: true }).eq("chat_id", item.chat.id),
+        ]);
+        return { ...item.chat, isGroup: true, event: ev, memberCount: count ?? 0, otherUser: null };
+      }
+
       const { data: otherPart } = await supabase
         .from("chat_participants")
         .select("user:profiles!chat_participants_user_id_fkey(*)")
         .eq("chat_id", item.chat.id)
         .neq("user_id", user.id)
-        .single();
-      
+        .limit(1)
+        .maybeSingle();
+
       return {
         ...item.chat,
+        isGroup: false,
         otherUser: otherPart?.user
       };
     }));
@@ -174,7 +189,8 @@ function ChatPage() {
 
     setReplyTo(null);
 
-    if (activeChat?.otherUser) {
+    // Group (event) chats are notified server-side by a DB trigger; DMs here.
+    if (activeChat?.otherUser && !activeChat.isGroup) {
       const preview = media_type === "image"
         ? "sent a photo"
         : media_type === "video"
@@ -277,7 +293,7 @@ function ChatPage() {
             <div className="p-8 text-center">
               <div className="brutal-card-flat p-4 bg-muted/20 border-white/20">
                 <p className="font-bold text-sm uppercase">No chats yet</p>
-                <p className="text-[10px] font-mono mt-2 text-muted-foreground">Accept a collab request to start building together.</p>
+                <p className="text-[10px] font-mono mt-2 text-muted-foreground">Accept a collab request, message a builder from their profile, or register for a huddle to join its event chat.</p>
               </div>
             </div>
           ) : (
@@ -293,17 +309,30 @@ function ChatPage() {
                 }`}
               >
                 <div className="relative">
-                  <Avatar profile={chat.otherUser} size={48} />
-                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border-2 border-black rounded-none flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 bg-primary" />
-                  </div>
+                  {chat.isGroup ? (
+                    <div className="huddle-theme">
+                      <div className="w-12 h-12 border-2 border-white bg-primary text-primary-foreground grid place-items-center overflow-hidden">
+                        {chat.event?.cover_image_url ? <img src={chat.event.cover_image_url} alt="" className="w-full h-full object-cover" /> : <Flame className="w-5 h-5" />}
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 px-1 h-4 bg-primary border-2 border-black text-primary-foreground font-mono text-[8px] font-black grid place-items-center">
+                        {chat.memberCount}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Avatar profile={chat.otherUser} size={48} />
+                      <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white border-2 border-black rounded-none flex items-center justify-center">
+                        <div className="w-1.5 h-1.5 bg-primary" />
+                      </div>
+                    </>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-display font-bold truncate uppercase text-sm tracking-tight">
-                    {chat.otherUser?.display_name || chat.otherUser?.username}
+                    {chat.isGroup ? (chat.title || chat.event?.title || "Event chat") : (chat.otherUser?.display_name || chat.otherUser?.username)}
                   </div>
                   <div className="text-[10px] font-mono opacity-70 truncate uppercase mt-0.5">
-                    {chat.collab_request?.post?.title || 'Direct Message'}
+                    {chat.isGroup ? `Huddle · ${chat.memberCount} members` : (chat.collab_request?.post?.title || 'Direct Message')}
                   </div>
                 </div>
               </Link>
@@ -313,28 +342,56 @@ function ChatPage() {
       </div>
 
       {/* Chat Window */}
-      <div className={`${activeChatId ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-background relative`}>
+      <div className={`${activeChatId ? 'flex' : 'hidden md:flex'} flex-1 flex-col bg-background relative ${activeChat?.isGroup ? "huddle-theme" : ""}`}>
         {activeChatId && activeChat ? (          <>
             {/* Chat Header */}
             <div className="p-4 border-b-2 border-white bg-card flex items-center gap-4 sticky top-0 z-10 shadow-[0_4px_0_0_rgba(255,255,255,0.05)]">
               <Link to="/chat" search={{ id: undefined }} className="md:hidden brutal-btn p-2">
                 <ArrowLeft className="w-5 h-5" />
               </Link>
-              <div className="relative">
-                <Avatar profile={activeChat.otherUser} size={44} />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-display font-black text-xl uppercase tracking-tight truncate">
-                  {activeChat.otherUser?.display_name || activeChat.otherUser?.username}
-                </div>
-                {activeChat.collab_request?.post?.title && (
-                  <div className="text-[10px] font-mono text-primary font-bold uppercase flex items-center gap-1.5 mt-0.5">
-                    <div className="w-2 h-2 bg-primary animate-pulse" />
-                    Matched on: {activeChat.collab_request.post.title}
+              {activeChat.isGroup ? (
+                <>
+                  <div className="w-11 h-11 border-2 border-white bg-primary text-primary-foreground grid place-items-center overflow-hidden shrink-0">
+                    {activeChat.event?.cover_image_url ? <img src={activeChat.event.cover_image_url} alt="" className="w-full h-full object-cover" /> : <Flame className="w-5 h-5" />}
                   </div>
-                )}
-              </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display font-black text-xl uppercase tracking-tight truncate">
+                      {activeChat.title || activeChat.event?.title || "Event chat"}
+                    </div>
+                    <div className="text-[10px] font-mono text-primary font-bold uppercase flex items-center gap-1.5 mt-0.5">
+                      <Users className="w-3 h-3" /> {activeChat.memberCount} members · event chat
+                    </div>
+                  </div>
+                  {activeChat.event && (
+                    <Link to="/huddle/$eventId" params={{ eventId: activeChat.event.id }} className="brutal-btn brutal-btn-ghost px-3 py-1.5 text-[10px] shrink-0">
+                      <Flame className="w-3 h-3" /> <span className="hidden sm:inline">View event</span>
+                    </Link>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div className="relative">
+                    <Avatar profile={activeChat.otherUser} size={44} />
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display font-black text-xl uppercase tracking-tight truncate">
+                      {activeChat.otherUser?.display_name || activeChat.otherUser?.username}
+                    </div>
+                    {activeChat.collab_request?.post?.title && (
+                      <div className="text-[10px] font-mono text-primary font-bold uppercase flex items-center gap-1.5 mt-0.5">
+                        <div className="w-2 h-2 bg-primary animate-pulse" />
+                        Matched on: {activeChat.collab_request.post.title}
+                      </div>
+                    )}
+                  </div>
+                  {activeChat.otherUser?.username && (
+                    <Link to="/u/$username" params={{ username: activeChat.otherUser.username }} className="brutal-btn brutal-btn-ghost px-3 py-1.5 text-[10px] shrink-0">
+                      <User className="w-3 h-3" /> <span className="hidden sm:inline">Profile</span>
+                    </Link>
+                  )}
+                </>
+              )}
             </div>
 
             {/* Messages */}
@@ -400,6 +457,12 @@ function ChatPage() {
                           </PopoverContent>
                         </Popover>
                       </div>
+
+                      {activeChat.isGroup && !isMe && showAvatar && msg.sender?.username && (
+                        <Link to="/u/$username" params={{ username: msg.sender.username }} className="block mb-1 text-[10px] font-mono font-black uppercase tracking-wider text-primary hover:underline">
+                          {displayName(msg.sender)}
+                        </Link>
+                      )}
 
                       {msg.reply && (
                         <button
