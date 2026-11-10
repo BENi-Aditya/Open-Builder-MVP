@@ -7,7 +7,7 @@ import { BuildLogCard, type BuildLog } from "@/components/BuildLogCard";
 import { CollabCard, type CollabPost } from "@/components/CollabCard";
 import { Composer } from "@/components/Composer";
 import { toast } from "sonner";
-import { Flame, Sparkles, Users, X, Rocket } from "lucide-react";
+import { Flame, Sparkles, Users, X, Rocket, ArrowUpRight } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: FeedPage });
 
@@ -152,6 +152,25 @@ function FeedPage() {
           )}
         </div>
       </header>
+
+      <a
+        href="https://www.huddlehq.in/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group brutal-card-flat mb-8 flex items-center gap-4 border-[#ff6b00]/60 p-4 transition-colors hover:border-[#ff6b00]"
+      >
+        <div className="grid h-11 w-11 shrink-0 place-items-center border-2 border-white bg-[#ff6b00] text-black">
+          <Flame className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-mono uppercase tracking-[0.16em] text-[#ff6b00]">Huddle · Season 1</p>
+          <p className="font-display text-lg font-black leading-tight">Six weeks to build something people actually use.</p>
+          <p className="text-xs text-muted-foreground">Build with a cohort, ship in public, meet everyone offline.</p>
+        </div>
+        <span className="hidden shrink-0 items-center gap-1 font-mono text-[10px] font-black uppercase tracking-widest text-[#ff6b00] sm:flex">
+          Join the waitlist <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+        </span>
+      </a>
 
       {user && (
         <section className="mb-4 space-y-3">

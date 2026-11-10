@@ -1,7 +1,7 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth-context";
 import {
-  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare, User
+  Home, Compass, Users, Bell, Bookmark, Settings, Plus, LogOut, Hammer, Search, MessageSquare, User, Flame, ArrowUpRight
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -9,14 +9,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { requestBrowserPermission } from "@/lib/notifications";
 import { Tutorial } from "@/components/Tutorial";
 
+/** Huddle lives on its own site; the nav just takes you there. */
+const HUDDLE_URL = "https://www.huddlehq.in/";
+
+type NavItem = { to: string; label: string; icon: typeof Home; external?: boolean };
+
 const NAV = [
   { to: "/", label: "Feed", icon: Home },
   { to: "/explore", label: "Explore", icon: Compass },
+  { to: HUDDLE_URL, label: "Huddle", icon: Flame, external: true },
   { to: "/collab", label: "Collab", icon: Users },
   { to: "/notifications", label: "Inbox", icon: Bell },
   { to: "/chat", label: "Messages", icon: MessageSquare },
   { to: "/saved", label: "Saved", icon: Bookmark },
-];
+] as NavItem[];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { user, profile, signOut } = useAuth();
@@ -89,6 +95,22 @@ export function AppShell({ children }: { children: ReactNode }) {
           {NAV.map((n) => {
             const active = loc.pathname === n.to || (n.to !== "/" && loc.pathname.startsWith(n.to));
             const className = n.to === "/notifications" ? "notifications-icon" : n.to === "/chat" ? "messages-icon" : "";
+            if (n.external) {
+              return (
+                <a
+                  key={n.to}
+                  href={n.to}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center justify-between px-3 py-2 border-2 border-transparent hover:border-white/30`}
+                >
+                  <span className="flex items-center gap-3 font-bold uppercase text-xs tracking-wider">
+                    <n.icon className="w-4 h-4 text-[#ff6b00]" /> {n.label}
+                  </span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-[#ff6b00]" />
+                </a>
+              );
+            }
             return (
               <Link
                 key={n.to}
@@ -138,23 +160,38 @@ export function AppShell({ children }: { children: ReactNode }) {
       {user && <Tutorial />}
 
       {/* mobile bottom bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-6 border-t-2 border-white bg-card/95 px-1 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
-        {[
+      <nav className="fixed bottom-0 left-0 right-0 z-50 grid grid-cols-7 border-t-2 border-white bg-card/95 px-0.5 pb-[max(env(safe-area-inset-bottom),0.35rem)] pt-1 backdrop-blur-sm md:hidden">
+        {([
           { to: "/", label: "Feed", icon: Home },
           { to: "/explore", label: "Explore", icon: Compass },
+          { to: HUDDLE_URL, label: "Huddle", icon: Flame, external: true },
           { to: "/collab", label: "Collab", icon: Users },
           { to: "/notifications", label: "Inbox", icon: Bell },
-          { to: "/chat", label: "Messages", icon: MessageSquare },
+          { to: "/chat", label: "Chat", icon: MessageSquare },
           profile
             ? { to: `/u/${profile.username}`, label: "Profile", icon: User }
             : { to: "/auth", label: "Profile", icon: User },
-        ].map((n) => {
+        ] as NavItem[]).map((n) => {
           const active = loc.pathname === n.to || (n.to !== "/" && loc.pathname.startsWith(n.to));
+          if (n.external) {
+            return (
+              <a
+                key={n.to}
+                href={n.to}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex min-h-14 flex-col items-center justify-center rounded-none border border-transparent px-0.5 py-1 text-[9px] font-bold uppercase tracking-tight text-[#ff6b00]"
+              >
+                <n.icon className="mb-0.5 h-4 w-4" />
+                {n.label}
+              </a>
+            );
+          }
           return (
             <Link
               key={n.to}
               to={n.to}
-              className={`flex min-h-14 flex-col items-center justify-center rounded-none border px-1 py-1 text-[9px] font-bold uppercase tracking-tight ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent text-muted-foreground"}`}
+              className={`flex min-h-14 flex-col items-center justify-center rounded-none border px-0.5 py-1 text-[9px] font-bold uppercase tracking-tight ${active ? "border-white bg-primary text-primary-foreground" : "border-transparent text-muted-foreground"}`}
             >
               <n.icon className="mb-0.5 h-4 w-4" />
               {n.label}
